@@ -1,0 +1,313 @@
+{
+  "registry_name": "Meridian Bank — Internal MCP Tool Catalog (seeded demo data)",
+  "tools": [
+    {
+      "name": "policy.search_documents",
+      "description": "Full-text and semantic search across internal policy, procedure, and product documentation. Returns ranked passages with document references.",
+      "input_parameters": [
+        { "name": "query", "type": "string", "required": true },
+        { "name": "document_types", "type": "string[]", "required": false },
+        { "name": "max_results", "type": "integer", "required": false }
+      ],
+      "owner_team": "knowledge-platform",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 }
+    },
+    {
+      "name": "policy.get_document",
+      "description": "Retrieve the full current version of an internal policy or procedure document by ID, including effective dates and revision history.",
+      "input_parameters": [
+        { "name": "document_id", "type": "string", "required": true },
+        { "name": "version", "type": "string", "required": false }
+      ],
+      "owner_team": "knowledge-platform",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+    },
+    {
+      "name": "accounts.lookup_customer_profile",
+      "description": "Fetch a customer's profile: name, contact details, segments, product holdings, and relationship history.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "include_holdings", "type": "boolean", "required": false }
+      ],
+      "owner_team": "customer-data",
+      "compliance_tags": [],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.003, "high": 0.008 }
+    },
+    {
+      "name": "accounts.get_balance",
+      "description": "Real-time available and ledger balance for a deposit account, including pending holds.",
+      "input_parameters": [
+        { "name": "account_id", "type": "string", "required": true }
+      ],
+      "owner_team": "core-banking",
+      "compliance_tags": ["pii-cleared", "audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+    },
+    {
+      "name": "accounts.get_transaction_history",
+      "description": "Paginated transaction history for an account with merchant enrichment and category codes.",
+      "input_parameters": [
+        { "name": "account_id", "type": "string", "required": true },
+        { "name": "from_date", "type": "date", "required": true },
+        { "name": "to_date", "type": "date", "required": true },
+        { "name": "page_size", "type": "integer", "required": false }
+      ],
+      "owner_team": "core-banking",
+      "compliance_tags": ["pii-cleared"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+    },
+    {
+      "name": "payments.initiate_transfer",
+      "description": "Initiate an internal or ACH transfer between accounts with idempotency keys and dual-control thresholds.",
+      "input_parameters": [
+        { "name": "source_account_id", "type": "string", "required": true },
+        { "name": "destination_account_id", "type": "string", "required": true },
+        { "name": "amount", "type": "money", "required": true },
+        { "name": "idempotency_key", "type": "string", "required": true }
+      ],
+      "owner_team": "payments-core",
+      "compliance_tags": ["pii-cleared", "audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.004, "high": 0.012 }
+    },
+    {
+      "name": "payments.get_transfer_status",
+      "description": "Status of a previously initiated transfer including settlement state and failure reasons.",
+      "input_parameters": [
+        { "name": "transfer_id", "type": "string", "required": true }
+      ],
+      "owner_team": "payments-core",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+    },
+    {
+      "name": "payments.tokenize_card",
+      "description": "Tokenize a card PAN for storage and downstream processing. PCI-DSS scope isolated to the tokenization service.",
+      "input_parameters": [
+        { "name": "card_number", "type": "string", "required": true },
+        { "name": "expiry", "type": "string", "required": true }
+      ],
+      "owner_team": "payments-core",
+      "compliance_tags": ["pii-cleared", "audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 }
+    },
+    {
+      "name": "cards.freeze_card",
+      "description": "Temporarily freeze or unfreeze a debit or credit card. Takes effect at the network within seconds.",
+      "input_parameters": [
+        { "name": "card_id", "type": "string", "required": true },
+        { "name": "action", "type": "enum[freeze,unfreeze]", "required": true }
+      ],
+      "owner_team": "cards-platform",
+      "compliance_tags": ["pii-cleared"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+    },
+    {
+      "name": "cards.get_card_controls",
+      "description": "Read current card controls: spend limits, merchant category blocks, geographic restrictions.",
+      "input_parameters": [
+        { "name": "card_id", "type": "string", "required": true }
+      ],
+      "owner_team": "cards-platform",
+      "compliance_tags": ["pii-cleared"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+    },
+    {
+      "name": "kyc.verify_identity",
+      "description": "Verify a customer's identity documents and biometrics against the KYC provider. Returns verification result and confidence.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "document_refs", "type": "string[]", "required": true }
+      ],
+      "owner_team": "identity-services",
+      "compliance_tags": ["pii-cleared", "audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.15, "high": 0.4 }
+    },
+    {
+      "name": "kyc.screen_sanctions",
+      "description": "Screen an individual or entity against sanctions, PEP, and adverse-media lists. Returns match candidates with scores.",
+      "input_parameters": [
+        { "name": "full_name", "type": "string", "required": true },
+        { "name": "date_of_birth", "type": "date", "required": false },
+        { "name": "country", "type": "string", "required": false }
+      ],
+      "owner_team": "financial-crime",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.05, "high": 0.12 }
+    },
+    {
+      "name": "kyc.extract_document_fields",
+      "description": "OCR extraction of fields from identity documents. Superseded by the KYC provider's built-in extraction.",
+      "input_parameters": [
+        { "name": "document_ref", "type": "string", "required": true }
+      ],
+      "owner_team": "identity-services",
+      "compliance_tags": ["pii-cleared"],
+      "status": "deprecated",
+      "est_cost_per_call_usd": { "low": 0.02, "high": 0.05 }
+    },
+    {
+      "name": "fraud.score_transaction",
+      "description": "Real-time fraud risk score for a transaction with reason codes. P99 latency 80ms.",
+      "input_parameters": [
+        { "name": "transaction_payload", "type": "object", "required": true }
+      ],
+      "owner_team": "fraud-engineering",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.003, "high": 0.009 }
+    },
+    {
+      "name": "fraud.report_suspicious_activity",
+      "description": "File an internal suspicious-activity case for investigator review. Feeds the SAR workflow.",
+      "input_parameters": [
+        { "name": "subject_customer_id", "type": "string", "required": true },
+        { "name": "narrative", "type": "string", "required": true },
+        { "name": "evidence_refs", "type": "string[]", "required": false }
+      ],
+      "owner_team": "financial-crime",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 }
+    },
+    {
+      "name": "lending.check_eligibility",
+      "description": "Rule-based eligibility pre-check for lending products using internal data only. No bureau footprint.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "product_code", "type": "string", "required": true },
+        { "name": "requested_amount", "type": "money", "required": false }
+      ],
+      "owner_team": "lending-platform",
+      "compliance_tags": ["pii-cleared", "audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.004, "high": 0.01 }
+    },
+    {
+      "name": "lending.get_bureau_credit_report",
+      "description": "Pull a full credit report from the external bureau. Leaves a hard or soft footprint depending on inquiry type.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "inquiry_type", "type": "enum[soft,hard]", "required": true }
+      ],
+      "owner_team": "lending-platform",
+      "compliance_tags": [],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.35, "high": 0.9 }
+    },
+    {
+      "name": "lending.calculate_affordability",
+      "description": "Income and expenditure affordability assessment from transaction data and stated income.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "stated_income", "type": "money", "required": false }
+      ],
+      "owner_team": "lending-platform",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.01, "high": 0.03 }
+    },
+    {
+      "name": "lending.generate_loan_offer",
+      "description": "Generate a priced, expiring loan offer document from an approved decision payload.",
+      "input_parameters": [
+        { "name": "decision_id", "type": "string", "required": true },
+        { "name": "term_months", "type": "integer", "required": true }
+      ],
+      "owner_team": "lending-platform",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.005, "high": 0.015 }
+    },
+    {
+      "name": "audit.log_event",
+      "description": "Append an immutable event to the regulatory audit trail. Write-once, retained 7 years.",
+      "input_parameters": [
+        { "name": "actor", "type": "string", "required": true },
+        { "name": "event_type", "type": "string", "required": true },
+        { "name": "payload", "type": "object", "required": true }
+      ],
+      "owner_team": "platform-audit",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.0005, "high": 0.001 }
+    },
+    {
+      "name": "audit.query_audit_trail",
+      "description": "Query the audit trail by actor, event type, and time range. Read access restricted to compliance roles.",
+      "input_parameters": [
+        { "name": "filters", "type": "object", "required": true },
+        { "name": "from_date", "type": "date", "required": true },
+        { "name": "to_date", "type": "date", "required": true }
+      ],
+      "owner_team": "platform-audit",
+      "compliance_tags": ["audit-grade"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 }
+    },
+    {
+      "name": "notifications.send_secure_message",
+      "description": "Send a message to a customer's in-app secure inbox. Supports templates and attachments.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "template_id", "type": "string", "required": true },
+        { "name": "variables", "type": "object", "required": false }
+      ],
+      "owner_team": "engagement-platform",
+      "compliance_tags": ["pii-cleared"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+    },
+    {
+      "name": "notifications.send_sms",
+      "description": "Send an SMS to a customer's registered number. Superseded by push and secure inbox; scheduled for decommission.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "message", "type": "string", "required": true }
+      ],
+      "owner_team": "engagement-platform",
+      "compliance_tags": ["pii-cleared"],
+      "status": "deprecated",
+      "est_cost_per_call_usd": { "low": 0.01, "high": 0.02 }
+    },
+    {
+      "name": "support.create_ticket",
+      "description": "Create a support ticket with priority, queue, and customer linkage. Returns ticket ID.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": false },
+        { "name": "subject", "type": "string", "required": true },
+        { "name": "body", "type": "string", "required": true },
+        { "name": "priority", "type": "enum[p1,p2,p3,p4]", "required": true }
+      ],
+      "owner_team": "support-platform",
+      "compliance_tags": ["pii-cleared"],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+    },
+    {
+      "name": "support.list_customer_cases",
+      "description": "List open and historical support cases for a customer, including free-text case notes.",
+      "input_parameters": [
+        { "name": "customer_id", "type": "string", "required": true },
+        { "name": "status_filter", "type": "enum[open,closed,all]", "required": false }
+      ],
+      "owner_team": "support-platform",
+      "compliance_tags": [],
+      "status": "active",
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+    }
+  ]
+}

@@ -18,7 +18,7 @@ export default function Home() {
             variant="outline"
             size="sm"
             nativeButton={false}
-            render={<a href="#cta" />}
+            render={<a href="/demo" />}
           >
             Get started
           </Button>

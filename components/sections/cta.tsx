@@ -36,11 +36,14 @@ export function Cta() {
             <Button
               size="lg"
               className="mt-10 w-full bg-brand text-white hover:bg-brand/90"
+              nativeButton={false}
+              render={<a href="/demo" />}
             >
               Get started
             </Button>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              No credit card required.
+              No credit card required. Demo runs against a seeded registry of
+              25 sample tools.
             </p>
           </div>
         </FadeIn>

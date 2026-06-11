@@ -20,7 +20,7 @@ export function Hero() {
             size="lg"
             className="bg-brand px-5 text-white hover:bg-brand/90"
             nativeButton={false}
-            render={<a href="#cta" />}
+            render={<a href="/demo" />}
           >
             Get started
           </Button>
