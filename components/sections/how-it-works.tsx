@@ -3,7 +3,7 @@ import { FadeIn } from "@/components/fade-in";
 const steps = [
   {
     title: "Connect your sources",
-    body: "GitHub, Jira, Linear, Confluence, Notion. Read-only, five minutes.",
+    body: "Your MCP tool registry (Kong, JFrog, or internal catalog) plus Confluence and Jira. Metadata only — never your source code. Security teams clear it in days, not quarters.",
   },
   {
     title: "SpecBridge maps reality",

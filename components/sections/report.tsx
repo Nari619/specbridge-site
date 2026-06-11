@@ -17,6 +17,11 @@ const rows = [
     note: "ships next sprint · PAY-291",
   },
   {
+    status: "Risky",
+    name: "Customer profile lookup",
+    note: "tool exists, not cleared for PII",
+  },
+  {
     status: "Gap",
     name: "EU tax calculation",
     note: "no owner found — flag before kickoff",
@@ -28,6 +33,8 @@ function StatusDot({ status }: { status: string }) {
     return <span className="size-2 rounded-full bg-brand" />;
   if (status === "In flight")
     return <span className="size-2 rounded-full border-[1.5px] border-brand" />;
+  if (status === "Risky")
+    return <span className="size-2 rounded-full bg-amber-500" />;
   return <span className="size-2 rounded-full bg-muted-foreground/40" />;
 }
 
@@ -62,9 +69,12 @@ export function Report() {
                   <p className="mt-1 text-5xl font-semibold tracking-tight tabular-nums">
                     68<span className="text-brand">%</span>
                   </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Est. run cost at forecast volume: $1,400–2,100/mo · modeled
+                  </p>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  2 reusable · 1 in flight · 1 gap
+                  2 reusable · 1 in flight · 1 risky · 1 gap
                 </p>
               </div>
               <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -77,7 +87,13 @@ export function Report() {
                     className="flex flex-wrap items-center gap-x-4 gap-y-1 py-4"
                   >
                     <StatusDot status={row.status} />
-                    <span className="w-16 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                    <span
+                      className={`w-16 text-xs font-medium tracking-wide uppercase ${
+                        row.status === "Risky"
+                          ? "text-amber-600 dark:text-amber-500"
+                          : "text-muted-foreground"
+                      }`}
+                    >
                       {row.status}
                     </span>
                     <span className="font-medium">{row.name}</span>
