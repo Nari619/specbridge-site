@@ -79,10 +79,10 @@ Follow these steps:
    - "risky": a tool exists and functionally fits, but its compliance posture doesn't match the use (e.g. handles PII without "pii-cleared") or it is deprecated/being decommissioned.
    - "missing": no tool in the registry supports it.
 4. For each capability, name the matched tool (registry "name" field, or null) and give a one-line justification.
-5. Attach status-specific detail blocks (schema below):
-   - covered: include "reuse" — copy version, owner_team, owner_contact, docs_url, repo_path, compliance_tags, est_cost_per_call_usd, input_parameters, example_call, and example_response VERBATIM from the matched registry entry.
-   - partial: include "reuse" (same as covered) PLUS "modification_plan": whats_missing (the gap at parameter level, e.g. "no theme/category parameter on input"), change_needed (the concrete change), modify_effort_days (number), build_new_effort_weeks (number), est_savings_usd (number — savings of modifying vs building new; assume a fully-loaded engineer costs ~$1,200/day and a build-week is 5 engineer-days).
-   - risky: include "reuse" (same as covered) PLUS "risk_block": missing_clearance (which clearance/tag is missing and why it matters), unblock_contact (the owning team's contact email from the registry, or "compliance-review@meridianbank.example" for clearance questions), est_unblock_time (e.g. "2–4 weeks for PII clearance review").
+5. Attach status-specific detail blocks (schema below). Always set "reuse" to null — reuse details are attached server-side from the registry using your matched_tool, so matched_tool must be the exact registry "name". Never copy registry fields into the output.
+   - covered: no extra block.
+   - partial: include "modification_plan": whats_missing (the gap at parameter level, e.g. "no theme/category parameter on input"), change_needed (the concrete change), modify_effort_days (number), build_new_effort_weeks (number), est_savings_usd (number — savings of modifying vs building new; assume a fully-loaded engineer costs ~$1,200/day and a build-week is 5 engineer-days).
+   - risky: include "risk_block": missing_clearance (which clearance/tag is missing and why it matters), unblock_contact (the owning team's contact email from the registry, or "compliance-review@meridianbank.example" for clearance questions), est_unblock_time (e.g. "2–4 weeks for PII clearance review").
    - missing: include "build_pack": draft_mcp_spec (a draft registry entry JSON for the new tool: name, description, input_parameters, suggested compliance_tags), build_effort_weeks (number), est_monthly_run_cost_usd ({low, high} at the PRD's stated volume), suggested_owner_team (an existing team from the registry), nearest_misses (EXACTLY 3 entries: {tool: registry tool name, reason: one line on why it doesn't fit}).
    Blocks that don't apply to a status must be null.
 6. Compute an overall readiness_score from 0-100 weighting covered=1, partial=0.5, risky=0.35, missing=0.
@@ -100,13 +100,7 @@ Respond with ONLY a JSON object — no markdown fences, no prose before or after
       "status": "covered" | "partial" | "risky" | "missing",
       "matched_tool": string | null,
       "justification": string,
-      "reuse": {
-        "version": string, "owner_team": string, "owner_contact": string,
-        "docs_url": string, "repo_path": string, "compliance_tags": string[],
-        "est_cost_per_call_usd": { "low": number, "high": number },
-        "input_parameters": [{ "name": string, "type": string, "required": boolean }],
-        "example_call": object, "example_response": object
-      } | null,
+      "reuse": null,
       "modification_plan": {
         "whats_missing": string, "change_needed": string,
         "modify_effort_days": number, "build_new_effort_weeks": number,
@@ -381,7 +375,8 @@ export async function POST(request: Request) {
   try {
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 8000,
+      max_tokens: 4000,
+      stream: false,
       system: SYSTEM_PROMPT,
       messages: [{ role: "user", content: `PRD to analyze:\n\n${prd}` }],
     });
