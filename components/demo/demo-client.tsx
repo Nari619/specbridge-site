@@ -4,28 +4,24 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ScoreArc } from "@/components/score-arc";
+import { CapabilityCard } from "@/components/demo/capability-card";
 import { samplePrds } from "@/data/sample-prds";
-import type { AnalysisResult } from "@/app/api/analyze/route";
+import type { AnalysisResult, Capability } from "@/app/api/analyze/route";
 
-const statusMeta: Record<
-  AnalysisResult["capabilities"][number]["status"],
-  { label: string; dot: string; text: string }
+type View = "pm" | "engineering" | "compliance";
+
+const viewConfig: Record<
+  View,
+  { label: string; order: Capability["status"][] }
 > = {
-  covered: { label: "Covered", dot: "bg-brand", text: "text-muted-foreground" },
-  partial: {
-    label: "Partial",
-    dot: "border-[1.5px] border-brand",
-    text: "text-muted-foreground",
+  pm: { label: "PM", order: ["partial", "missing", "risky", "covered"] },
+  engineering: {
+    label: "Engineering",
+    order: ["covered", "partial", "missing", "risky"],
   },
-  risky: {
-    label: "Risky",
-    dot: "bg-amber-500",
-    text: "text-amber-600 dark:text-amber-500",
-  },
-  missing: {
-    label: "Missing",
-    dot: "bg-muted-foreground/40",
-    text: "text-muted-foreground",
+  compliance: {
+    label: "Compliance",
+    order: ["risky", "missing", "partial", "covered"],
   },
 };
 
@@ -37,6 +33,7 @@ export function DemoClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [view, setView] = useState<View>("pm");
 
   function selectSample(id: string) {
     const sample = samplePrds.find((p) => p.id === id);
@@ -61,6 +58,7 @@ export function DemoClient() {
         return;
       }
       setResult(data as AnalysisResult);
+      setView("pm");
     } catch {
       setError("Couldn't reach the analysis service. Check your connection and try again.");
     } finally {
@@ -74,6 +72,91 @@ export function DemoClient() {
         {} as Record<string, number>,
       )
     : null;
+
+  const totalSavings = result
+    ? result.capabilities.reduce(
+        (sum, c) => sum + (c.modification_plan?.est_savings_usd ?? 0),
+        0,
+      )
+    : 0;
+
+  const sortedCapabilities = result
+    ? [...result.capabilities].sort(
+        (a, b) =>
+          viewConfig[view].order.indexOf(a.status) -
+          viewConfig[view].order.indexOf(b.status),
+      )
+    : [];
+
+  const verdictHeader = result && (
+    <div className="flex flex-wrap items-center justify-between gap-8">
+      <div>
+        <p className="text-sm text-muted-foreground">Readiness report</p>
+        <p
+          className={`mt-2 text-5xl font-semibold tracking-tight ${
+            result.verdict === "GO"
+              ? "text-brand"
+              : "text-amber-600 dark:text-amber-500"
+          }`}
+        >
+          {result.verdict}
+        </p>
+        <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+          {result.verdict_reasoning}
+        </p>
+        <p className="mt-4 text-xs text-muted-foreground">
+          Est. run cost at forecast volume: $
+          {usd.format(result.est_monthly_cost_usd.low)}–
+          {usd.format(result.est_monthly_cost_usd.high)}/mo · modeled
+        </p>
+      </div>
+      <ScoreArc value={result.readiness_score} />
+    </div>
+  );
+
+  const viewBanner =
+    result &&
+    (view === "pm" ? (
+      totalSavings > 0 && (
+        <div className="rounded-xl border border-brand/30 bg-brand/5 px-5 py-4">
+          <p className="text-sm font-medium">
+            Modify instead of building new:{" "}
+            <span className="text-brand">
+              ~${usd.format(totalSavings)} in modeled savings
+            </span>{" "}
+            across {counts?.partial ?? 0}{" "}
+            {(counts?.partial ?? 0) === 1 ? "capability" : "capabilities"}.
+          </p>
+        </div>
+      )
+    ) : view === "engineering" ? (
+      <div className="rounded-xl border px-5 py-4">
+        <p className="text-sm font-medium">
+          {counts?.covered ?? 0}{" "}
+          {(counts?.covered ?? 0) === 1 ? "tool is" : "tools are"} ready to
+          reuse as-is — schemas, examples, and repo pointers below.
+        </p>
+      </div>
+    ) : (
+      <div className="rounded-xl border border-amber-500/40 bg-amber-500/5 px-5 py-4">
+        <p className="text-sm font-medium text-amber-600 dark:text-amber-500">
+          {(counts?.risky ?? 0) + (counts?.missing ?? 0)} capabilities need
+          review before kickoff: {counts?.risky ?? 0} with compliance flags,{" "}
+          {counts?.missing ?? 0} with no existing tool.
+        </p>
+      </div>
+    ));
+
+  const cards = (
+    <div className="space-y-3">
+      {sortedCapabilities.map((cap) => (
+        <CapabilityCard
+          key={`${view}-${cap.requirement}`}
+          capability={cap}
+        />
+      ))}
+    </div>
+  );
 
   return (
     <div>
@@ -139,69 +222,57 @@ export function DemoClient() {
           transition={{ duration: 0.45, ease: "easeOut" }}
           className="mt-12 overflow-hidden rounded-2xl border bg-card shadow-sm"
         >
-          <div className="p-6 md:p-10">
-            <div className="flex flex-wrap items-center justify-between gap-8">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Readiness report
-                </p>
-                <p
-                  className={`mt-2 text-5xl font-semibold tracking-tight ${
-                    result.verdict === "GO"
-                      ? "text-brand"
-                      : "text-amber-600 dark:text-amber-500"
-                  }`}
-                >
-                  {result.verdict}
-                </p>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-                  {result.verdict_reasoning}
-                </p>
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Est. run cost at forecast volume: $
-                  {usd.format(result.est_monthly_cost_usd.low)}–
-                  {usd.format(result.est_monthly_cost_usd.high)}/mo · modeled
-                </p>
+          <div className="space-y-8 p-6 md:p-10">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="inline-flex rounded-full border p-1">
+                {(Object.keys(viewConfig) as View[]).map((v) => (
+                  <button
+                    key={v}
+                    type="button"
+                    onClick={() => setView(v)}
+                    className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                      view === v
+                        ? "bg-brand/10 font-medium text-brand"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {viewConfig[v].label}
+                  </button>
+                ))}
               </div>
-              <ScoreArc value={result.readiness_score} />
+              {counts && (
+                <p className="text-sm text-muted-foreground">
+                  {(["covered", "partial", "risky", "missing"] as const)
+                    .filter((s) => counts[s])
+                    .map((s) => `${counts[s]} ${s}`)
+                    .join(" · ")}
+                </p>
+              )}
             </div>
 
-            {counts && (
-              <p className="mt-8 text-sm text-muted-foreground">
-                {(["covered", "partial", "risky", "missing"] as const)
-                  .filter((s) => counts[s])
-                  .map((s) => `${counts[s]} ${s}`)
-                  .join(" · ")}
-              </p>
+            {view === "pm" && (
+              <>
+                {verdictHeader}
+                {viewBanner}
+                {cards}
+              </>
+            )}
+            {view === "engineering" && (
+              <>
+                {viewBanner}
+                {cards}
+                {verdictHeader}
+              </>
+            )}
+            {view === "compliance" && (
+              <>
+                {viewBanner}
+                {verdictHeader}
+                {cards}
+              </>
             )}
 
-            <ul className="mt-4 divide-y border-t">
-              {result.capabilities.map((cap, i) => (
-                <li key={i} className="py-4">
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                    <span
-                      className={`size-2 shrink-0 rounded-full ${statusMeta[cap.status].dot}`}
-                    />
-                    <span
-                      className={`w-16 text-xs font-medium tracking-wide uppercase ${statusMeta[cap.status].text}`}
-                    >
-                      {statusMeta[cap.status].label}
-                    </span>
-                    <span className="font-medium">{cap.requirement}</span>
-                    {cap.matched_tool && (
-                      <span className="ml-auto font-mono text-xs text-muted-foreground">
-                        {cap.matched_tool}
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 pl-6 text-sm text-muted-foreground md:pl-24">
-                    {cap.justification}
-                  </p>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-8 rounded-xl bg-muted/50 p-5">
+            <div className="rounded-xl bg-muted/50 p-5">
               <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
                 Top blocker
               </p>

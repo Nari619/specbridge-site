@@ -10,9 +10,24 @@
         { "name": "max_results", "type": "integer", "required": false }
       ],
       "owner_team": "knowledge-platform",
+      "owner_contact": "knowledge-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/policy-search-documents",
+      "repo_path": "banking-platform/services/knowledge/tools/search_documents.py",
+      "version": "3.2.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 },
+      "example_call": { "query": "overdraft fee waiver policy", "max_results": 3 },
+      "example_response": {
+        "results": [
+          {
+            "document_id": "POL-2214",
+            "title": "Overdraft Fee Waivers",
+            "score": 0.92,
+            "excerpt": "Fees may be waived once per rolling 12 months when…"
+          }
+        ]
+      }
     },
     {
       "name": "policy.get_document",
@@ -22,9 +37,20 @@
         { "name": "version", "type": "string", "required": false }
       ],
       "owner_team": "knowledge-platform",
+      "owner_contact": "knowledge-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/policy-get-document",
+      "repo_path": "banking-platform/services/knowledge/tools/get_document.py",
+      "version": "3.2.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 },
+      "example_call": { "document_id": "POL-2214" },
+      "example_response": {
+        "document_id": "POL-2214",
+        "title": "Overdraft Fee Waivers",
+        "effective_date": "2025-11-01",
+        "body_md": "## Eligibility\nA fee may be waived when…"
+      }
     },
     {
       "name": "accounts.lookup_customer_profile",
@@ -34,9 +60,20 @@
         { "name": "include_holdings", "type": "boolean", "required": false }
       ],
       "owner_team": "customer-data",
+      "owner_contact": "customer-data@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/accounts-lookup-customer-profile",
+      "repo_path": "banking-platform/services/customer-data/tools/lookup_profile.py",
+      "version": "5.1.3",
       "compliance_tags": [],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.003, "high": 0.008 }
+      "est_cost_per_call_usd": { "low": 0.003, "high": 0.008 },
+      "example_call": { "customer_id": "cus_8842", "include_holdings": true },
+      "example_response": {
+        "customer_id": "cus_8842",
+        "name": "A. Carter",
+        "segment": "mass-affluent",
+        "holdings": ["checking", "credit-card"]
+      }
     },
     {
       "name": "accounts.get_balance",
@@ -45,9 +82,15 @@
         { "name": "account_id", "type": "string", "required": true }
       ],
       "owner_team": "core-banking",
+      "owner_contact": "core-banking@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/accounts-get-balance",
+      "repo_path": "banking-platform/services/core-banking/tools/get_balance.py",
+      "version": "7.0.2",
       "compliance_tags": ["pii-cleared", "audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 },
+      "example_call": { "account_id": "acc_5521" },
+      "example_response": { "available": 2412.55, "ledger": 2492.55, "currency": "USD" }
     },
     {
       "name": "accounts.get_transaction_history",
@@ -59,9 +102,29 @@
         { "name": "page_size", "type": "integer", "required": false }
       ],
       "owner_team": "core-banking",
+      "owner_contact": "core-banking@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/accounts-get-transaction-history",
+      "repo_path": "banking-platform/services/core-banking/tools/transaction_history.py",
+      "version": "6.4.0",
       "compliance_tags": ["pii-cleared"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 },
+      "example_call": {
+        "account_id": "acc_5521",
+        "from_date": "2026-05-01",
+        "to_date": "2026-05-31"
+      },
+      "example_response": {
+        "transactions": [
+          {
+            "id": "txn_991",
+            "amount": -42.18,
+            "merchant": "Grocer Mart",
+            "category": "groceries"
+          }
+        ],
+        "next_page": null
+      }
     },
     {
       "name": "payments.initiate_transfer",
@@ -73,9 +136,20 @@
         { "name": "idempotency_key", "type": "string", "required": true }
       ],
       "owner_team": "payments-core",
+      "owner_contact": "payments-core@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/payments-initiate-transfer",
+      "repo_path": "banking-platform/services/payments/tools/initiate_transfer.py",
+      "version": "9.2.1",
       "compliance_tags": ["pii-cleared", "audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.004, "high": 0.012 }
+      "est_cost_per_call_usd": { "low": 0.004, "high": 0.012 },
+      "example_call": {
+        "source_account_id": "acc_5521",
+        "destination_account_id": "acc_7710",
+        "amount": { "value": 250, "currency": "USD" },
+        "idempotency_key": "idem_4d8a"
+      },
+      "example_response": { "transfer_id": "trf_30967", "state": "pending_settlement" }
     },
     {
       "name": "payments.get_transfer_status",
@@ -84,9 +158,19 @@
         { "name": "transfer_id", "type": "string", "required": true }
       ],
       "owner_team": "payments-core",
+      "owner_contact": "payments-core@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/payments-get-transfer-status",
+      "repo_path": "banking-platform/services/payments/tools/transfer_status.py",
+      "version": "9.2.1",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 },
+      "example_call": { "transfer_id": "trf_30967" },
+      "example_response": {
+        "transfer_id": "trf_30967",
+        "state": "settled",
+        "settled_at": "2026-06-10T14:02:11Z"
+      }
     },
     {
       "name": "payments.tokenize_card",
@@ -96,9 +180,15 @@
         { "name": "expiry", "type": "string", "required": true }
       ],
       "owner_team": "payments-core",
+      "owner_contact": "payments-core@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/payments-tokenize-card",
+      "repo_path": "banking-platform/services/payments/tools/tokenize_card.py",
+      "version": "4.8.0",
       "compliance_tags": ["pii-cleared", "audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 },
+      "example_call": { "card_number": "4111111111111111", "expiry": "09/28" },
+      "example_response": { "token": "tok_c91x", "network": "visa", "last4": "1111" }
     },
     {
       "name": "cards.freeze_card",
@@ -108,9 +198,19 @@
         { "name": "action", "type": "enum[freeze,unfreeze]", "required": true }
       ],
       "owner_team": "cards-platform",
+      "owner_contact": "cards-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/cards-freeze-card",
+      "repo_path": "banking-platform/services/cards/tools/freeze_card.py",
+      "version": "3.3.5",
       "compliance_tags": ["pii-cleared"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 },
+      "example_call": { "card_id": "crd_2210", "action": "freeze" },
+      "example_response": {
+        "card_id": "crd_2210",
+        "state": "frozen",
+        "effective_at": "2026-06-10T09:14:02Z"
+      }
     },
     {
       "name": "cards.get_card_controls",
@@ -119,9 +219,19 @@
         { "name": "card_id", "type": "string", "required": true }
       ],
       "owner_team": "cards-platform",
+      "owner_contact": "cards-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/cards-get-card-controls",
+      "repo_path": "banking-platform/services/cards/tools/card_controls.py",
+      "version": "3.3.5",
       "compliance_tags": ["pii-cleared"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.002 },
+      "example_call": { "card_id": "crd_2210" },
+      "example_response": {
+        "spend_limit_daily": 500,
+        "blocked_mcc": ["7995"],
+        "geo_restriction": "domestic-only"
+      }
     },
     {
       "name": "kyc.verify_identity",
@@ -131,9 +241,19 @@
         { "name": "document_refs", "type": "string[]", "required": true }
       ],
       "owner_team": "identity-services",
+      "owner_contact": "identity-services@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/kyc-verify-identity",
+      "repo_path": "banking-platform/services/identity/tools/verify_identity.py",
+      "version": "2.9.0",
       "compliance_tags": ["pii-cleared", "audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.15, "high": 0.4 }
+      "est_cost_per_call_usd": { "low": 0.15, "high": 0.4 },
+      "example_call": { "customer_id": "cus_8842", "document_refs": ["doc_he12"] },
+      "example_response": {
+        "result": "verified",
+        "confidence": 0.97,
+        "checks": ["document", "liveness"]
+      }
     },
     {
       "name": "kyc.screen_sanctions",
@@ -144,9 +264,19 @@
         { "name": "country", "type": "string", "required": false }
       ],
       "owner_team": "financial-crime",
+      "owner_contact": "financial-crime@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/kyc-screen-sanctions",
+      "repo_path": "banking-platform/services/fincrime/tools/screen_sanctions.py",
+      "version": "4.1.2",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.05, "high": 0.12 }
+      "est_cost_per_call_usd": { "low": 0.05, "high": 0.12 },
+      "example_call": { "full_name": "Jordan Ashe", "date_of_birth": "1984-03-02" },
+      "example_response": {
+        "matches": [],
+        "screened_lists": ["OFAC", "EU", "UN"],
+        "disposition": "clear"
+      }
     },
     {
       "name": "kyc.extract_document_fields",
@@ -155,9 +285,18 @@
         { "name": "document_ref", "type": "string", "required": true }
       ],
       "owner_team": "identity-services",
+      "owner_contact": "identity-services@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/kyc-extract-document-fields",
+      "repo_path": "banking-platform/services/identity/tools/extract_document_fields.py",
+      "version": "1.7.9",
       "compliance_tags": ["pii-cleared"],
       "status": "deprecated",
-      "est_cost_per_call_usd": { "low": 0.02, "high": 0.05 }
+      "est_cost_per_call_usd": { "low": 0.02, "high": 0.05 },
+      "example_call": { "document_ref": "doc_he12" },
+      "example_response": {
+        "fields": { "name": "JORDAN ASHE", "dob": "1984-03-02" },
+        "confidence": 0.88
+      }
     },
     {
       "name": "fraud.score_transaction",
@@ -166,9 +305,21 @@
         { "name": "transaction_payload", "type": "object", "required": true }
       ],
       "owner_team": "fraud-engineering",
+      "owner_contact": "fraud-engineering@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/fraud-score-transaction",
+      "repo_path": "banking-platform/services/fraud/tools/score_transaction.py",
+      "version": "8.5.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.003, "high": 0.009 }
+      "est_cost_per_call_usd": { "low": 0.003, "high": 0.009 },
+      "example_call": {
+        "transaction_payload": { "amount": 1899.99, "mcc": "5732", "channel": "ecom" }
+      },
+      "example_response": {
+        "score": 0.81,
+        "band": "high",
+        "reason_codes": ["VEL01", "GEO04"]
+      }
     },
     {
       "name": "fraud.report_suspicious_activity",
@@ -179,9 +330,22 @@
         { "name": "evidence_refs", "type": "string[]", "required": false }
       ],
       "owner_team": "financial-crime",
+      "owner_contact": "financial-crime@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/fraud-report-suspicious-activity",
+      "repo_path": "banking-platform/services/fincrime/tools/report_suspicious_activity.py",
+      "version": "2.2.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.004 },
+      "example_call": {
+        "subject_customer_id": "cus_8842",
+        "narrative": "Multiple rapid transfers to newly added payees…"
+      },
+      "example_response": {
+        "case_id": "sar_1104",
+        "queue": "fincrime-l2",
+        "status": "open"
+      }
     },
     {
       "name": "lending.check_eligibility",
@@ -192,9 +356,15 @@
         { "name": "requested_amount", "type": "money", "required": false }
       ],
       "owner_team": "lending-platform",
+      "owner_contact": "lending-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/lending-check-eligibility",
+      "repo_path": "banking-platform/services/lending/tools/check_eligibility.py",
+      "version": "5.6.1",
       "compliance_tags": ["pii-cleared", "audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.004, "high": 0.01 }
+      "est_cost_per_call_usd": { "low": 0.004, "high": 0.01 },
+      "example_call": { "customer_id": "cus_8842", "product_code": "PL-36" },
+      "example_response": { "eligible": true, "max_amount": 15000, "footprint": "none" }
     },
     {
       "name": "lending.get_bureau_credit_report",
@@ -204,9 +374,20 @@
         { "name": "inquiry_type", "type": "enum[soft,hard]", "required": true }
       ],
       "owner_team": "lending-platform",
+      "owner_contact": "lending-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/lending-get-bureau-credit-report",
+      "repo_path": "banking-platform/services/lending/tools/bureau_credit_report.py",
+      "version": "3.0.4",
       "compliance_tags": [],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.35, "high": 0.9 }
+      "est_cost_per_call_usd": { "low": 0.35, "high": 0.9 },
+      "example_call": { "customer_id": "cus_8842", "inquiry_type": "soft" },
+      "example_response": {
+        "bureau": "experiax",
+        "score": 721,
+        "tradelines": 14,
+        "inquiry_footprint": "soft"
+      }
     },
     {
       "name": "lending.calculate_affordability",
@@ -216,9 +397,22 @@
         { "name": "stated_income", "type": "money", "required": false }
       ],
       "owner_team": "lending-platform",
+      "owner_contact": "lending-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/lending-calculate-affordability",
+      "repo_path": "banking-platform/services/lending/tools/calculate_affordability.py",
+      "version": "4.2.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.01, "high": 0.03 }
+      "est_cost_per_call_usd": { "low": 0.01, "high": 0.03 },
+      "example_call": {
+        "customer_id": "cus_8842",
+        "stated_income": { "value": 86000, "currency": "USD" }
+      },
+      "example_response": {
+        "monthly_disposable": 1240.5,
+        "dti": 0.31,
+        "verdict": "affordable"
+      }
     },
     {
       "name": "lending.generate_loan_offer",
@@ -228,9 +422,20 @@
         { "name": "term_months", "type": "integer", "required": true }
       ],
       "owner_team": "lending-platform",
+      "owner_contact": "lending-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/lending-generate-loan-offer",
+      "repo_path": "banking-platform/services/lending/tools/generate_loan_offer.py",
+      "version": "5.6.1",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.005, "high": 0.015 }
+      "est_cost_per_call_usd": { "low": 0.005, "high": 0.015 },
+      "example_call": { "decision_id": "dec_8821", "term_months": 36 },
+      "example_response": {
+        "offer_id": "off_5530",
+        "apr": 11.9,
+        "monthly_payment": 331.42,
+        "expires_at": "2026-06-26"
+      }
     },
     {
       "name": "audit.log_event",
@@ -241,9 +446,19 @@
         { "name": "payload", "type": "object", "required": true }
       ],
       "owner_team": "platform-audit",
+      "owner_contact": "platform-audit@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/audit-log-event",
+      "repo_path": "banking-platform/services/audit/tools/log_event.py",
+      "version": "6.0.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.0005, "high": 0.001 }
+      "est_cost_per_call_usd": { "low": 0.0005, "high": 0.001 },
+      "example_call": {
+        "actor": "assistant:policy-bot",
+        "event_type": "ai.answer.generated",
+        "payload": { "trace_id": "trc_77a" }
+      },
+      "example_response": { "event_id": "evt_99812", "committed": true }
     },
     {
       "name": "audit.query_audit_trail",
@@ -254,9 +469,22 @@
         { "name": "to_date", "type": "date", "required": true }
       ],
       "owner_team": "platform-audit",
+      "owner_contact": "platform-audit@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/audit-query-audit-trail",
+      "repo_path": "banking-platform/services/audit/tools/query_audit_trail.py",
+      "version": "6.0.0",
       "compliance_tags": ["audit-grade"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.006 },
+      "example_call": {
+        "filters": { "actor": "assistant:policy-bot" },
+        "from_date": "2026-06-01",
+        "to_date": "2026-06-10"
+      },
+      "example_response": {
+        "events": [{ "event_id": "evt_99812", "event_type": "ai.answer.generated" }],
+        "count": 1
+      }
     },
     {
       "name": "notifications.send_secure_message",
@@ -267,9 +495,23 @@
         { "name": "variables", "type": "object", "required": false }
       ],
       "owner_team": "engagement-platform",
+      "owner_contact": "engagement-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/notifications-send-secure-message",
+      "repo_path": "banking-platform/services/engagement/tools/send_secure_message.py",
+      "version": "7.3.2",
       "compliance_tags": ["pii-cleared"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 },
+      "example_call": {
+        "customer_id": "cus_8842",
+        "template_id": "tmpl_ticket_ack",
+        "variables": { "ticket_id": "tkt_4471" }
+      },
+      "example_response": {
+        "message_id": "msg_2209",
+        "channel": "secure-inbox",
+        "delivered": true
+      }
     },
     {
       "name": "notifications.send_sms",
@@ -279,9 +521,15 @@
         { "name": "message", "type": "string", "required": true }
       ],
       "owner_team": "engagement-platform",
+      "owner_contact": "engagement-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/notifications-send-sms",
+      "repo_path": "banking-platform/services/engagement/tools/send_sms.py",
+      "version": "5.9.9",
       "compliance_tags": ["pii-cleared"],
       "status": "deprecated",
-      "est_cost_per_call_usd": { "low": 0.01, "high": 0.02 }
+      "est_cost_per_call_usd": { "low": 0.01, "high": 0.02 },
+      "example_call": { "customer_id": "cus_8842", "message": "Your request was received." },
+      "example_response": { "sms_id": "sms_1182", "status": "queued" }
     },
     {
       "name": "support.create_ticket",
@@ -293,9 +541,24 @@
         { "name": "priority", "type": "enum[p1,p2,p3,p4]", "required": true }
       ],
       "owner_team": "support-platform",
+      "owner_contact": "support-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/support-create-ticket",
+      "repo_path": "banking-platform/services/support/tools/create_ticket.py",
+      "version": "4.4.0",
       "compliance_tags": ["pii-cleared"],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 }
+      "est_cost_per_call_usd": { "low": 0.001, "high": 0.003 },
+      "example_call": {
+        "customer_id": "cus_8842",
+        "subject": "Disputed fee",
+        "body": "Customer disputes the overdraft fee applied on 2026-06-02.",
+        "priority": "p2"
+      },
+      "example_response": {
+        "ticket_id": "tkt_4471",
+        "queue": "retail-support",
+        "sla_hours": 8
+      }
     },
     {
       "name": "support.list_customer_cases",
@@ -305,9 +568,19 @@
         { "name": "status_filter", "type": "enum[open,closed,all]", "required": false }
       ],
       "owner_team": "support-platform",
+      "owner_contact": "support-platform@meridianbank.example",
+      "docs_url": "https://docs.meridian.example/tools/support-list-customer-cases",
+      "repo_path": "banking-platform/services/support/tools/list_customer_cases.py",
+      "version": "4.4.0",
       "compliance_tags": [],
       "status": "active",
-      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 }
+      "est_cost_per_call_usd": { "low": 0.002, "high": 0.005 },
+      "example_call": { "customer_id": "cus_8842", "status_filter": "open" },
+      "example_response": {
+        "cases": [
+          { "ticket_id": "tkt_4471", "subject": "Disputed fee", "status": "open" }
+        ]
+      }
     }
   ]
 }
