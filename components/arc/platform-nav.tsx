@@ -6,7 +6,13 @@ const linkClass = (active: boolean) =>
     : "text-muted-foreground hover:text-foreground";
 
 /** Shared top nav so /demo and /arc read as one platform. */
-export function PlatformNav({ active }: { active: "demo" | "arc" }) {
+export function PlatformNav({
+  active,
+  showTagline = true,
+}: {
+  active: "demo" | "arc";
+  showTagline?: boolean;
+}) {
   return (
     <header className="absolute inset-x-0 top-0 z-20">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
@@ -17,9 +23,11 @@ export function PlatformNav({ active }: { active: "demo" | "arc" }) {
           >
             SpecBridge<span className="text-brand">.</span>
           </Link>
-          <p className="text-xs leading-tight text-muted-foreground">
-            Know what&rsquo;s built. Before you build.
-          </p>
+          {showTagline && (
+            <p className="text-xs leading-tight text-muted-foreground">
+              Know what&rsquo;s built. Before you build.
+            </p>
+          )}
         </div>
         <nav className="flex items-center gap-5 text-sm">
           <Link href="/demo" className={linkClass(active === "demo")}>

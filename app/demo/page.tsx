@@ -12,16 +12,16 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <>
-      <PlatformNav active="demo" />
+      <PlatformNav active="demo" showTagline={false} />
       <main className="px-6 pt-36 pb-32">
         <div className="mx-auto max-w-5xl">
           <p className="inline-block rounded-md bg-destructive px-2.5 py-1 text-xs font-medium tracking-widest text-white uppercase">
             Live demo
           </p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-            Discover the built.
+            Know what&rsquo;s built.
             <br />
-            Build the unbuilt.
+            Before you build.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Pick a sample PRD or paste your own. SpecBridge decomposes it into
