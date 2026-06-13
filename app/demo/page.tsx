@@ -23,7 +23,7 @@ export default function DemoPage() {
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Pick a sample PRD or paste your own. SpecBridge decomposes it into
-            capabilities, matches each against a bank&rsquo;s internal tool
+            capabilities, matches each against an enterprise internal tool
             registry, and returns a readiness verdict.
           </p>
           <div className="mt-8">
