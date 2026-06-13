@@ -39,10 +39,13 @@ const profiles: AgentProfile[] = [
   {
     agent: "refund-processing",
     task: "Evaluate and execute customer refund requests",
-    baseRatePerHour: 10,
+    baseRatePerHour: 6,
     costBand: [0.16, 0.33],
     apiCallBand: [3, 7],
     failureRate: 0.04,
+    // The through-line villain: design-time estimate $0.38/task, but a retry
+    // storm from hour 36 drives the real cost-per-action to ~$3.64.
+    runawayFromHour: 36,
   },
   {
     agent: "kyc-review",
@@ -67,7 +70,6 @@ const profiles: AgentProfile[] = [
     costBand: [0.12, 0.26],
     apiCallBand: [2, 5],
     failureRate: 0.03,
-    runawayFromHour: 36,
   },
   {
     agent: "support-triage",
@@ -114,7 +116,7 @@ function buildSession(
     // The villain: stuck in a retry loop, re-calling the same failing tool.
     retries = Math.round(between(rand, 5, 12));
     apiCalls = retries * Math.round(between(rand, 2, 4));
-    cost = between(rand, 2.2, 7.5);
+    cost = between(rand, 2.3, 7.8);
     outcome = rand() < 0.92 ? "failure" : "aborted";
     durationSec = between(rand, 240, 900);
   } else {

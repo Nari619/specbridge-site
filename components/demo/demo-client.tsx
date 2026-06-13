@@ -117,6 +117,25 @@ export function DemoClient() {
           has runtime data for these features, the estimate is corrected by
           what the agents actually cost.
         </p>
+        {selectedId === "refund-processing" && (
+          <a
+            href="/arc"
+            className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 hover:bg-brand/10"
+          >
+            <span className="text-sm">
+              <span className="font-medium">
+                This feature is live in production
+              </span>
+              <span className="block text-xs text-muted-foreground">
+                Design-time estimate ~$0.38/task · ARC measured $3.64/task
+                actual
+              </span>
+            </span>
+            <span className="shrink-0 text-sm font-medium text-brand">
+              See ARC&rsquo;s actual cost →
+            </span>
+          </a>
+        )}
       </div>
       <ScoreArc value={result.readiness_score} />
     </div>

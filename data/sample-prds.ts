@@ -6,6 +6,17 @@ export type SamplePrd = {
 
 export const samplePrds: SamplePrd[] = [
   {
+    id: "refund-processing",
+    title: "Refund Processing Agent",
+    body: `We want an agent that evaluates and executes customer refund requests end to end. When a customer disputes a charge, the agent checks the refund against our policy documents, pulls the relevant transaction history to confirm the charge, and verifies the customer's identity and profile before acting.
+
+If the request is within policy, the agent issues the refund as a transfer back to the customer's account, logs the full decision to the regulatory audit trail, and notifies the customer via the secure inbox. Anything outside policy or above a value threshold is routed to a human reviewer rather than auto-approved.
+
+Every refund touches customer money and personal data, so the whole flow must be audit-grade and handle PII appropriately.
+
+Volume forecast: ~18,000 refunds/month. This is the highest-volume agent in the fleet, so per-task run cost matters a lot.`,
+  },
+  {
     id: "ai-banking-assistant",
     title: "AI Banking Assistant",
     body: `We're building an in-app AI assistant for retail customers. Customers ask natural-language questions and the assistant answers grounded in our internal policy and procedure documents — fees, dispute timelines, overdraft rules — with citations to the source document.

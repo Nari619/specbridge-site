@@ -11,7 +11,7 @@
         "audit-grade"
       ],
       "business_value_per_task_usd": 4,
-      "specbridge_estimate_usd": 0.25
+      "specbridge_estimate_usd": 0.38
     },
     {
       "agent_name": "kyc-review",
@@ -49,7 +49,7 @@
         "audit-grade"
       ],
       "business_value_per_task_usd": 0.75,
-      "specbridge_estimate_usd": 0.38
+      "specbridge_estimate_usd": 0.2
     },
     {
       "agent_name": "support-triage",

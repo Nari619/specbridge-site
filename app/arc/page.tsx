@@ -10,6 +10,7 @@ import { runPolicy, verifyDeterminism } from "@/lib/arc-policy";
 import { computeEconomics } from "@/lib/arc-economics";
 import { computeVariance } from "@/lib/arc-variance";
 import { PlatformNav } from "@/components/arc/platform-nav";
+import { LifecycleBanner } from "@/components/arc/lifecycle-banner";
 import {
   verdictStyle,
   interventionStyle,
@@ -119,6 +120,10 @@ export default function ArcPage() {
             </p>
           </div>
 
+          <div className="mt-8">
+            <LifecycleBanner from="arc" />
+          </div>
+
           {/* Closed Loop */}
           <section className="mt-20">
             <SectionLabel>Closed loop</SectionLabel>
@@ -197,6 +202,15 @@ export default function ArcPage() {
                       <p className="mt-4 rounded-lg border-l-2 border-brand bg-brand/5 py-2 pr-2 pl-3 text-sm text-brand">
                         {v.next_estimate_should_assume}
                       </p>
+                    )}
+                    {v.agent_name === "refund-processing" && (
+                      <a
+                        href="/demo"
+                        className="mt-4 block border-t pt-3 text-sm font-medium text-brand hover:underline"
+                      >
+                        Design-time estimate from SpecBridge: $
+                        {v.estimate_usd.toFixed(2)}/task →
+                      </a>
                     )}
                   </div>
                 );
