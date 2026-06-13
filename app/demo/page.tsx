@@ -15,7 +15,7 @@ export default function DemoPage() {
       <PlatformNav active="demo" />
       <main className="px-6 pt-36 pb-32">
         <div className="mx-auto max-w-5xl">
-          <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
+          <p className="inline-block rounded-md bg-destructive px-2.5 py-1 text-xs font-medium tracking-widest text-white uppercase">
             Live demo
           </p>
           <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight text-balance md:text-5xl">
