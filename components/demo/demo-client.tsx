@@ -109,6 +109,14 @@ export function DemoClient() {
           {usd.format(result.est_monthly_cost_usd.low)}–
           {usd.format(result.est_monthly_cost_usd.high)}/mo · modeled
         </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          This is a design-time estimate. Once{" "}
+          <a href="/arc" className="text-brand hover:underline">
+            ARC
+          </a>{" "}
+          has runtime data for these features, the estimate is corrected by
+          what the agents actually cost.
+        </p>
       </div>
       <ScoreArc value={result.readiness_score} />
     </div>

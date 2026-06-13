@@ -1,0 +1,67 @@
+{
+  "contracts": [
+    {
+      "agent_name": "refund-processing",
+      "task_type": "Evaluate and execute customer refund requests",
+      "max_cost_per_task_usd": 0.5,
+      "daily_fleet_ceiling_usd": 2000,
+      "escalation_rule": "Escalate to a human reviewer when daily fleet spend exceeds the ceiling; individual tasks above per-task cap are paused, not auto-approved.",
+      "regulatory_tags": [
+        "gdpr-art-22",
+        "audit-grade"
+      ],
+      "business_value_per_task_usd": 4,
+      "specbridge_estimate_usd": 0.25
+    },
+    {
+      "agent_name": "kyc-review",
+      "task_type": "First-pass review of KYC document packets",
+      "max_cost_per_task_usd": 1.2,
+      "daily_fleet_ceiling_usd": 800,
+      "escalation_rule": "Throttle to 50% throughput at 80% of the daily ceiling; stop at the ceiling and route remaining packets to the manual queue.",
+      "regulatory_tags": [
+        "gdpr-art-22",
+        "audit-grade"
+      ],
+      "business_value_per_task_usd": 6,
+      "specbridge_estimate_usd": 0.7
+    },
+    {
+      "agent_name": "fraud-investigation",
+      "task_type": "Assemble evidence packets for flagged transactions",
+      "max_cost_per_task_usd": 2.5,
+      "daily_fleet_ceiling_usd": 3500,
+      "escalation_rule": "Never stop mid-investigation; page the fincrime on-call when spend passes the ceiling and finish open cases at reduced concurrency.",
+      "regulatory_tags": [
+        "audit-grade",
+        "sar-workflow"
+      ],
+      "business_value_per_task_usd": "unknown",
+      "specbridge_estimate_usd": 1.1
+    },
+    {
+      "agent_name": "invoice-reconciliation",
+      "task_type": "Match supplier invoices to purchase orders and ledger entries",
+      "max_cost_per_task_usd": 0.4,
+      "daily_fleet_ceiling_usd": 250,
+      "escalation_rule": "Warn the owning team at 75% of the daily ceiling; hard-stop the fleet at the ceiling — reconciliation is never time-critical.",
+      "regulatory_tags": [
+        "audit-grade"
+      ],
+      "business_value_per_task_usd": 0.75,
+      "specbridge_estimate_usd": 0.38
+    },
+    {
+      "agent_name": "support-triage",
+      "task_type": "Classify and route inbound support messages",
+      "max_cost_per_task_usd": 0.15,
+      "daily_fleet_ceiling_usd": 100,
+      "escalation_rule": "Warn the owner at 75% of the daily ceiling; throttle to half throughput at 90%; never stop fully — fall back to keyword routing.",
+      "regulatory_tags": [
+        "pii-handling"
+      ],
+      "business_value_per_task_usd": 0.3,
+      "specbridge_estimate_usd": 0.07
+    }
+  ]
+}

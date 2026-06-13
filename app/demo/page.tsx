@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { DemoClient } from "@/components/demo/demo-client";
+import { PlatformNav } from "@/components/arc/platform-nav";
 
 export const metadata: Metadata = {
   title: "Demo — SpecBridge AI",
@@ -11,19 +11,7 @@ export const metadata: Metadata = {
 export default function DemoPage() {
   return (
     <>
-      <header className="absolute inset-x-0 top-0 z-20">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-          <Link href="/" className="text-lg font-semibold tracking-tight">
-            SpecBridge<span className="text-brand">.</span>
-          </Link>
-          <Link
-            href="/"
-            className="text-sm text-muted-foreground hover:text-foreground"
-          >
-            ← Back to site
-          </Link>
-        </div>
-      </header>
+      <PlatformNav active="demo" />
       <main className="px-6 pt-36 pb-32">
         <div className="mx-auto max-w-5xl">
           <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">

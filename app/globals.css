@@ -133,3 +133,22 @@
     @apply font-sans scroll-smooth;
   }
 }
+
+/* Evidence Pack print rules — print-to-PDF should look like a filed document. */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .evidence-section {
+    break-before: page;
+  }
+  .evidence-section:first-of-type {
+    break-before: avoid;
+  }
+  .evidence-entry {
+    break-inside: avoid;
+  }
+  @page {
+    margin: 18mm;
+  }
+}
