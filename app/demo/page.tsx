@@ -6,7 +6,7 @@ import { LifecycleBanner } from "@/components/arc/lifecycle-banner";
 export const metadata: Metadata = {
   title: "Demo — SpecBridge AI",
   description:
-    "Score a PRD against a seeded banking tool registry and get a live readiness report.",
+    "Score a PRD against a seeded enterprise tool registry and get a live readiness report.",
 };
 
 export default function DemoPage() {

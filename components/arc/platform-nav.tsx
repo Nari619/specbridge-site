@@ -10,9 +10,17 @@ export function PlatformNav({ active }: { active: "demo" | "arc" }) {
   return (
     <header className="absolute inset-x-0 top-0 z-20">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
-          SpecBridge<span className="text-brand">.</span>
-        </Link>
+        <div className="flex flex-col">
+          <Link
+            href="/"
+            className="text-lg font-semibold leading-tight tracking-tight"
+          >
+            SpecBridge<span className="text-brand">.</span>
+          </Link>
+          <p className="text-xs leading-tight text-muted-foreground">
+            Know what&rsquo;s built. Before you build.
+          </p>
+        </div>
         <nav className="flex items-center gap-5 text-sm">
           <Link href="/demo" className={linkClass(active === "demo")}>
             Demo
