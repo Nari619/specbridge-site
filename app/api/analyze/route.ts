@@ -1,8 +1,15 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
-import registry from "@/data/registry.json";
+import registryJson from "@/data/registry.json";
+// Type-only import — erased at compile time, so it never triggers the Supabase
+// client module to load. The runtime fetch uses a dynamic import (see POST).
+import type { RegistryTool } from "@/lib/registry-source";
 
 export const maxDuration = 60;
+
+// Static fallback registry. Used whenever the live Supabase registry can't be
+// read, so the demo never hard-crashes.
+const staticTools = registryJson.tools as unknown as RegistryTool[];
 
 const STATUSES = ["covered", "partial", "risky", "missing"] as const;
 type CapabilityStatus = (typeof STATUSES)[number];
@@ -82,12 +89,11 @@ export type AnalysisResult = {
   unblock_path: string;
 };
 
-type RegistryTool = (typeof registry.tools)[number];
-const toolMap = new Map<string, RegistryTool>(
-  registry.tools.map((t) => [t.name, t]),
-);
+function buildToolMap(tools: RegistryTool[]): Map<string, RegistryTool> {
+  return new Map(tools.map((t) => [t.name, t]));
+}
 
-const SYSTEM_PROMPT = `You are SpecBridge, an engineering-readiness analyst for product managers at a bank. You receive a PRD and must score it against the bank's internal MCP tool registry (provided below as JSON). The registry is the complete, authoritative list of tools that exist — do not invent tools.
+const SYSTEM_PROMPT_BODY = `You are SpecBridge, an engineering-readiness analyst for product managers at an enterprise. You receive a PRD and must score it against the enterprise's internal MCP tool registry (provided below as JSON). The registry is the complete, authoritative list of tools that exist — do not invent tools.
 
 Follow these steps:
 1. Extract the concrete requirements from the PRD.
@@ -139,10 +145,12 @@ Respond with ONLY a JSON object — no markdown fences, no prose before or after
   "verdict": "GO" | "NO-GO",
   "verdict_reasoning": string,
   "unblock_path": string
-}
+}`;
 
-TOOL REGISTRY:
-${JSON.stringify(registry, null, 2)}`;
+/** Build the full system prompt by appending the active tool registry. */
+function buildSystemPrompt(tools: RegistryTool[]): string {
+  return `${SYSTEM_PROMPT_BODY}\n\nTOOL REGISTRY:\n${JSON.stringify({ tools }, null, 2)}`;
+}
 
 function extractJson(text: string): string {
   // Strip markdown fences if the model added them despite instructions
@@ -305,7 +313,10 @@ function buildRiskBlock(
  * from the tool's registry compliance_tags, or when the tool is deprecated.
  * The LLM's justification still explains the concern, but never sets status.
  */
-function applyComplianceRules(cap: Capability): Capability {
+function applyComplianceRules(
+  cap: Capability,
+  toolMap: Map<string, RegistryTool>,
+): Capability {
   const tool = cap.matched_tool ? toolMap.get(cap.matched_tool) : undefined;
   if (!tool) return cap; // unresolved or "missing" — no tags to read
 
@@ -330,7 +341,10 @@ function applyComplianceRules(cap: Capability): Capability {
   return { ...cap, risk_block: null };
 }
 
-function validate(raw: unknown): AnalysisResult | null {
+function validate(
+  raw: unknown,
+  toolMap: Map<string, RegistryTool>,
+): AnalysisResult | null {
   if (typeof raw !== "object" || raw === null) return null;
   const r = raw as Record<string, unknown>;
   if (!Array.isArray(r.capabilities) || r.capabilities.length === 0)
@@ -389,7 +403,9 @@ function validate(raw: unknown): AnalysisResult | null {
   }
 
   // Deterministic risky decision happens here — not in the LLM.
-  const finalCapabilities = capabilities.map(applyComplianceRules);
+  const finalCapabilities = capabilities.map((c) =>
+    applyComplianceRules(c, toolMap),
+  );
 
   // Recompute the readiness score from the FINAL (code-decided) statuses so the
   // score can't disagree with the rows the user sees.
@@ -458,6 +474,28 @@ export async function POST(request: Request) {
     );
   }
 
+  // Read the live registry from Supabase. The dynamic import keeps the Supabase
+  // client out of this module's static graph, so even a configuration error
+  // (e.g. missing env vars) is caught here and falls back to the static
+  // registry — the demo never hard-crashes on a registry problem.
+  let tools: RegistryTool[];
+  try {
+    const { getRegistryTools } = await import("@/lib/registry-source");
+    const fetched = await getRegistryTools();
+    if (fetched.length === 0) throw new Error("Supabase returned 0 tools");
+    tools = fetched;
+    console.log(`[analyze] using live Supabase registry (${tools.length} tools)`);
+  } catch (error) {
+    console.error(
+      "[analyze] Supabase registry unavailable — falling back to static registry.json:",
+      error instanceof Error ? error.message : error,
+    );
+    tools = staticTools;
+  }
+
+  const toolMap = buildToolMap(tools);
+  const systemPrompt = buildSystemPrompt(tools);
+
   const client = new Anthropic();
 
   let text: string;
@@ -466,7 +504,7 @@ export async function POST(request: Request) {
       model: "claude-sonnet-4-6",
       max_tokens: 4000,
       stream: false,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: [{ role: "user", content: `PRD to analyze:\n\n${prd}` }],
     });
     text = response.content
@@ -497,7 +535,7 @@ export async function POST(request: Request) {
 
   let result: AnalysisResult | null = null;
   try {
-    result = validate(JSON.parse(extractJson(text)));
+    result = validate(JSON.parse(extractJson(text)), toolMap);
   } catch {
     result = null;
   }
