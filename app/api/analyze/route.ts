@@ -7,6 +7,22 @@ export const maxDuration = 60;
 const STATUSES = ["covered", "partial", "risky", "missing"] as const;
 type CapabilityStatus = (typeof STATUSES)[number];
 
+// "risky" is NOT assigned by the LLM. The model classifies functional fit only;
+// the risky/not-risky decision is made deterministically in code from the
+// registry's compliance_tags (see applyComplianceRules).
+const LLM_STATUSES = ["covered", "partial", "missing"] as const;
+
+// The only clearances code understands. A required_clearance outside this set
+// is ignored, so a hallucinated tag can never trigger a risky flag.
+const KNOWN_CLEARANCES = ["pii-cleared", "audit-grade"] as const;
+
+const STATUS_WEIGHTS: Record<CapabilityStatus, number> = {
+  covered: 1,
+  partial: 0.5,
+  risky: 0.35,
+  missing: 0,
+};
+
 export type ReuseDetails = {
   version: string | null;
   owner_team: string | null;
@@ -47,6 +63,9 @@ export type Capability = {
   status: CapabilityStatus;
   matched_tool: string | null;
   justification: string;
+  /** clearances the capability needs (LLM-stated); code compares these to the
+   * matched tool's actual registry compliance_tags to decide RISKY */
+  required_clearances: string[];
   reuse: ReuseDetails | null;
   modification_plan: ModificationPlan | null;
   risk_block: RiskBlock | null;
@@ -73,18 +92,17 @@ const SYSTEM_PROMPT = `You are SpecBridge, an engineering-readiness analyst for 
 Follow these steps:
 1. Extract the concrete requirements from the PRD.
 2. Decompose them into atomic capabilities (one system action each, e.g. "search policy documents", "pull bureau credit report").
-3. Match each capability against the registry and classify it:
-   - "covered": an active tool fully supports it, with compliance tags appropriate to the use (e.g. a capability touching personal data needs "pii-cleared"; a regulatory record needs "audit-grade").
-   - "partial": a tool covers some of it, or a deprecated tool is the only match.
-   - "risky": a tool exists and functionally fits, but its compliance posture doesn't match the use (e.g. handles PII without "pii-cleared") or it is deprecated/being decommissioned.
+3. Match each capability against the registry and classify its FUNCTIONAL fit only — ignore compliance posture when choosing the status (compliance is decided separately, in code):
+   - "covered": an active tool fully supports the capability.
+   - "partial": a tool covers some of it, or a deprecated tool is the only functional match.
    - "missing": no tool in the registry supports it.
-4. For each capability, name the matched tool (registry "name" field, or null) and give a one-line justification.
+   Do NOT output "risky". Whether a match is risky is decided deterministically in code from the registry's compliance_tags — not by you.
+4. For each capability: name the matched tool (registry "name" field, or null), give a one-line justification, and list "required_clearances" — the clearances the capability demands based on the data it touches. Choose ONLY from ["pii-cleared", "audit-grade"]: include "pii-cleared" if the capability reads or writes personal/customer data; include "audit-grade" if it produces a regulatory record or a decision that must be auditable. Use [] if neither applies. Your justification may explain a compliance concern, but it must not change the status.
 5. Attach status-specific detail blocks (schema below). Always set "reuse" to null — reuse details are attached server-side from the registry using your matched_tool, so matched_tool must be the exact registry "name". Never copy registry fields into the output.
    - covered: no extra block.
    - partial: include "modification_plan": whats_missing (the gap at parameter level, e.g. "no theme/category parameter on input"), change_needed (the concrete change), modify_effort_days (number), build_new_effort_weeks (number), est_savings_usd (number — savings of modifying vs building new; assume a fully-loaded engineer costs ~$1,200/day and a build-week is 5 engineer-days).
-   - risky: include "risk_block": missing_clearance (which clearance/tag is missing and why it matters), unblock_contact (the owning team's contact email from the registry, or "compliance-review@meridianbank.example" for clearance questions), est_unblock_time (e.g. "2–4 weeks for PII clearance review").
    - missing: include "build_pack": draft_mcp_spec (a draft registry entry JSON for the new tool: name, description, input_parameters, suggested compliance_tags), build_effort_weeks (number), est_monthly_run_cost_usd ({low, high} at the PRD's stated volume), suggested_owner_team (an existing team from the registry), nearest_misses (EXACTLY 3 entries: {tool: registry tool name, reason: one line on why it doesn't fit}).
-   Blocks that don't apply to a status must be null.
+   Do NOT output a "risk_block" — code builds it when it decides a capability is risky. Blocks that don't apply to a status must be null.
 6. Compute an overall readiness_score from 0-100 weighting covered=1, partial=0.5, risky=0.35, missing=0.
 7. Estimate total monthly run cost as a low-high USD range using the registry's est_cost_per_call_usd and any volume figures in the PRD.
 8. Name the single top blocker.
@@ -97,17 +115,15 @@ Respond with ONLY a JSON object — no markdown fences, no prose before or after
   "capabilities": [
     {
       "requirement": string,
-      "status": "covered" | "partial" | "risky" | "missing",
+      "status": "covered" | "partial" | "missing",
       "matched_tool": string | null,
       "justification": string,
+      "required_clearances": string[],
       "reuse": null,
       "modification_plan": {
         "whats_missing": string, "change_needed": string,
         "modify_effort_days": number, "build_new_effort_weeks": number,
         "est_savings_usd": number
-      } | null,
-      "risk_block": {
-        "missing_clearance": string, "unblock_contact": string, "est_unblock_time": string
       } | null,
       "build_pack": {
         "draft_mcp_spec": object, "build_effort_weeks": number,
@@ -234,16 +250,6 @@ function normalizeModificationPlan(v: unknown): ModificationPlan | null {
   };
 }
 
-function normalizeRiskBlock(v: unknown): RiskBlock | null {
-  const o = asObject(v);
-  if (!o) return null;
-  const missing_clearance = str(o.missing_clearance);
-  const unblock_contact = str(o.unblock_contact);
-  const est_unblock_time = str(o.est_unblock_time);
-  if (!missing_clearance || !unblock_contact || !est_unblock_time) return null;
-  return { missing_clearance, unblock_contact, est_unblock_time };
-}
-
 function normalizeBuildPack(v: unknown): BuildPack | null {
   const o = asObject(v);
   if (!o) return null;
@@ -274,6 +280,56 @@ function normalizeBuildPack(v: unknown): BuildPack | null {
   };
 }
 
+function buildRiskBlock(
+  tool: RegistryTool,
+  missing: string[],
+  deprecated: boolean,
+): RiskBlock {
+  if (missing.length > 0) {
+    return {
+      missing_clearance: `${missing.join(", ")} — required for the data this capability handles, absent on ${tool.name}`,
+      unblock_contact: "compliance-review@meridianbank.example",
+      est_unblock_time: "2–4 weeks for clearance review · modeled",
+    };
+  }
+  return {
+    missing_clearance: `${tool.name} is deprecated and scheduled for decommission`,
+    unblock_contact: tool.owner_contact ?? "compliance-review@meridianbank.example",
+    est_unblock_time: "plan migration before kickoff · modeled",
+  };
+}
+
+/**
+ * Deterministic risky decision. Code — not the LLM — owns risky/not-risky:
+ * a matched tool is RISKY when a clearance the capability requires is absent
+ * from the tool's registry compliance_tags, or when the tool is deprecated.
+ * The LLM's justification still explains the concern, but never sets status.
+ */
+function applyComplianceRules(cap: Capability): Capability {
+  const tool = cap.matched_tool ? toolMap.get(cap.matched_tool) : undefined;
+  if (!tool) return cap; // unresolved or "missing" — no tags to read
+
+  const actual = new Set(tool.compliance_tags);
+  const required = cap.required_clearances.filter((c) =>
+    (KNOWN_CLEARANCES as readonly string[]).includes(c),
+  );
+  const missing = required.filter((c) => !actual.has(c));
+  const deprecated = tool.status === "deprecated";
+
+  if (missing.length > 0 || deprecated) {
+    return {
+      ...cap,
+      status: "risky",
+      risk_block: buildRiskBlock(tool, missing, deprecated),
+      // risky owns the detail block; clear any functional-status blocks.
+      modification_plan: null,
+      build_pack: null,
+    };
+  }
+  // No compliance gap → guarantee not-risky.
+  return { ...cap, risk_block: null };
+}
+
 function validate(raw: unknown): AnalysisResult | null {
   if (typeof raw !== "object" || raw === null) return null;
   const r = raw as Record<string, unknown>;
@@ -284,16 +340,26 @@ function validate(raw: unknown): AnalysisResult | null {
   for (const item of r.capabilities) {
     const c = asObject(item);
     if (!c) return null;
-    const status = String(c.status ?? "").toLowerCase();
+    let status = String(c.status ?? "").toLowerCase();
+    // The LLM should emit functional statuses only. If it slips and says
+    // "risky", treat the functional fit as "covered" and let the deterministic
+    // pass re-decide from the registry tags.
+    if (status === "risky") status = "covered";
     if (
       typeof c.requirement !== "string" ||
       typeof c.justification !== "string" ||
-      !STATUSES.includes(status as CapabilityStatus)
+      !LLM_STATUSES.includes(status as (typeof LLM_STATUSES)[number])
     )
       return null;
 
     const matched_tool =
       typeof c.matched_tool === "string" ? c.matched_tool : null;
+
+    const required_clearances = Array.isArray(c.required_clearances)
+      ? c.required_clearances
+          .map(String)
+          .filter((t) => (KNOWN_CLEARANCES as readonly string[]).includes(t))
+      : [];
 
     // Registry is the source of truth for reuse facts; the model's copy is a
     // fallback for tools we can't resolve.
@@ -310,26 +376,49 @@ function validate(raw: unknown): AnalysisResult | null {
       status: status as CapabilityStatus,
       matched_tool,
       justification: c.justification,
+      required_clearances,
       reuse,
       modification_plan:
         status === "partial"
           ? normalizeModificationPlan(c.modification_plan)
           : null,
-      risk_block: status === "risky" ? normalizeRiskBlock(c.risk_block) : null,
+      risk_block: null, // code decides risky and builds this block below
       build_pack:
         status === "missing" ? normalizeBuildPack(c.build_pack) : null,
     });
   }
 
+  // Deterministic risky decision happens here — not in the LLM.
+  const finalCapabilities = capabilities.map(applyComplianceRules);
+
+  // Recompute the readiness score from the FINAL (code-decided) statuses so the
+  // score can't disagree with the rows the user sees.
+  const computedScore = finalCapabilities.length
+    ? Math.round(
+        (100 *
+          finalCapabilities.reduce(
+            (sum, c) => sum + STATUS_WEIGHTS[c.status],
+            0,
+          )) /
+          finalCapabilities.length,
+      )
+    : 0;
+
   const cost = range(r.est_monthly_cost_usd);
-  const score = num(r.readiness_score);
   const verdict = String(r.verdict ?? "").toUpperCase();
-  if (score === null || !cost) return null;
+  if (!cost) return null;
   if (verdict !== "GO" && verdict !== "NO-GO") return null;
 
+  // TODO: verdict/top_blocker are LLM prose generated in the same pass as the
+  // matches, BEFORE the deterministic risky rules run, so a code-flipped risky
+  // row isn't reflected in the GO/NO-GO sentence. Making the verdict consistent
+  // with the final statuses needs a second LLM pass (or a deterministic verdict)
+  // conditioned on finalCapabilities — deferred to avoid a second round-trip on
+  // this latency-sensitive route.
+
   return {
-    capabilities,
-    readiness_score: Math.max(0, Math.min(100, Math.round(score))),
+    capabilities: finalCapabilities,
+    readiness_score: Math.max(0, Math.min(100, computedScore)),
     est_monthly_cost_usd: cost,
     top_blocker: String(r.top_blocker ?? ""),
     verdict,
