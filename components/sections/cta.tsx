@@ -42,8 +42,9 @@ export function Cta() {
               Get started
             </Button>
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              No credit card required. Demo runs against a seeded registry of
-              25 sample tools.
+              No credit card required. Demo runs against a live registry of 100
+              sample banking tools — SpecBridge works with any enterprise tool
+              registry.
             </p>
           </div>
         </FadeIn>

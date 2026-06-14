@@ -232,7 +232,8 @@ export function DemoClient() {
           )}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Demo runs against a seeded registry of 25 sample tools.
+          Demo runs against a live registry of 100 sample banking tools —
+          SpecBridge works with any enterprise tool registry.
         </p>
       </div>
 
