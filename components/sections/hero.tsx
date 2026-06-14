@@ -18,7 +18,7 @@ export function Hero() {
         <div className="mt-10 flex items-center gap-3">
           <Button
             size="lg"
-            className="bg-brand px-5 text-white hover:bg-brand/90"
+            className="bg-brand px-5 text-white transition-colors duration-200 ease-out hover:bg-brand/90"
             nativeButton={false}
             render={<a href="/demo" />}
           >
@@ -27,6 +27,7 @@ export function Hero() {
           <Button
             size="lg"
             variant="ghost"
+            className="px-5 transition-colors duration-200 ease-out"
             nativeButton={false}
             render={<a href="#how-it-works" />}
           >

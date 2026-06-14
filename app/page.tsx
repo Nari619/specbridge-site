@@ -17,6 +17,7 @@ export default function Home() {
           <Button
             variant="outline"
             size="sm"
+            className="rounded-md px-3 transition-colors duration-200 ease-out"
             nativeButton={false}
             render={<a href="/demo" />}
           >

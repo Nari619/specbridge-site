@@ -120,7 +120,7 @@ export function DemoClient() {
         {selectedId === "refund-processing" && (
           <a
             href="/arc"
-            className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3 hover:bg-brand/10"
+            className="mt-4 flex items-center justify-between gap-4 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 transition-colors duration-200 ease-out hover:bg-brand/10"
           >
             <span className="text-sm">
               <span className="font-medium">
@@ -193,7 +193,7 @@ export function DemoClient() {
             key={sample.id}
             type="button"
             onClick={() => selectSample(sample.id)}
-            className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+            className={`rounded-md border px-4 py-1.5 text-sm transition-colors duration-200 ease-out ${
               selectedId === sample.id
                 ? "border-brand bg-brand/10 text-brand"
                 : "text-muted-foreground hover:border-brand/40 hover:text-foreground"
@@ -218,7 +218,7 @@ export function DemoClient() {
       <div className="mt-4 flex flex-wrap items-center gap-4">
         <Button
           size="lg"
-          className="bg-brand px-6 text-white hover:bg-brand/90"
+          className="bg-brand px-5 text-white transition-colors duration-200 ease-out hover:bg-brand/90"
           disabled={loading || prd.trim().length === 0}
           onClick={runAnalysis}
         >
@@ -251,13 +251,13 @@ export function DemoClient() {
         >
           <div className="space-y-8 p-6 md:p-10">
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="inline-flex rounded-full border p-1">
+              <div className="inline-flex rounded-lg border p-1">
                 {(Object.keys(viewConfig) as View[]).map((v) => (
                   <button
                     key={v}
                     type="button"
                     onClick={() => setView(v)}
-                    className={`rounded-full px-4 py-1.5 text-sm transition-colors ${
+                    className={`rounded-md px-4 py-1.5 text-sm transition-colors duration-200 ease-out ${
                       view === v
                         ? "bg-brand/10 font-medium text-brand"
                         : "text-muted-foreground hover:text-foreground"

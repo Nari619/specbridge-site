@@ -3,7 +3,7 @@ import Link from "next/link";
 const linkClass = (active: boolean) =>
   active
     ? "font-medium text-foreground"
-    : "text-muted-foreground hover:text-foreground";
+    : "text-muted-foreground transition-colors duration-200 ease-out hover:text-foreground";
 
 /** Shared top nav so /demo and /arc read as one platform. */
 export function PlatformNav({
@@ -38,7 +38,7 @@ export function PlatformNav({
           </Link>
           <Link
             href="/"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground transition-colors duration-200 ease-out hover:text-foreground"
           >
             Site ↗
           </Link>

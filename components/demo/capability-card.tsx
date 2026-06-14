@@ -64,7 +64,7 @@ function CodeSearchButton({ repoPath }: { repoPath: string }) {
         href={`https://codesearch.meridian.example/search?q=${encodeURIComponent(repoPath)}`}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+        className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-out hover:bg-muted"
       >
         Open in code search ↗
       </a>
@@ -139,7 +139,7 @@ function ReuseSection({ reuse }: { reuse: ReuseDetails }) {
             href={reuse.docs_url}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors duration-200 ease-out hover:bg-muted"
           >
             View docs ↗
           </a>
@@ -160,7 +160,7 @@ export function CapabilityCard({ capability }: { capability: Capability }) {
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4 text-left hover:bg-muted/40"
+        className="flex w-full flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4 text-left transition-colors duration-200 ease-out hover:bg-muted/40"
       >
         <span className={`size-2 shrink-0 rounded-full ${meta.dot}`} />
         <span

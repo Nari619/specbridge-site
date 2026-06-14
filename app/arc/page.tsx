@@ -108,7 +108,7 @@ export default function ArcPage() {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <a
               href="/arc/evidence"
-              className="inline-flex items-center rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand/90"
+              className="inline-flex items-center rounded-md bg-brand px-5 py-2 text-sm font-medium text-white transition-colors duration-200 ease-out hover:bg-brand/90"
             >
               Generate Evidence Pack →
             </a>

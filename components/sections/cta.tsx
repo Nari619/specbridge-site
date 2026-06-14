@@ -35,7 +35,7 @@ export function Cta() {
             </ul>
             <Button
               size="lg"
-              className="mt-10 w-full bg-brand text-white hover:bg-brand/90"
+              className="mt-10 w-full bg-brand px-5 text-white transition-colors duration-200 ease-out hover:bg-brand/90"
               nativeButton={false}
               render={<a href="/demo" />}
             >
