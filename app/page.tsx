@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo-mark";
 import { Hero } from "@/components/sections/hero";
+import { Pipeline } from "@/components/sections/pipeline";
 import { Problem } from "@/components/sections/problem";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { Report } from "@/components/sections/report";
@@ -34,6 +35,7 @@ export default function Home() {
       <main>
         <Hero />
         <Problem />
+        <Pipeline />
         <HowItWorks />
         <Report />
         <Vision />
