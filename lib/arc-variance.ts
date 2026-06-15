@@ -80,7 +80,7 @@ export function computeVariance(
         ratio: null,
         variance_pct: null,
         direction: "on-track" as VarianceDirection,
-        cause: "No completed tasks in the window — no actual to compare.",
+        cause: "No completed tasks in the window. No actual to compare.",
         next_estimate_should_assume: null,
       };
     }
@@ -98,24 +98,24 @@ export function computeVariance(
     // order: retry storms, then cost creep, then "tracks estimate".
     let cause: string;
     if (ratio >= MATERIAL_OVERRUN && sig.avgRetries >= 2) {
-      cause = `Actual ${ratio.toFixed(1)}x estimate — driven by retry storms: avg ${sig.avgRetries.toFixed(1)} retries/task (peak ${sig.maxRetries}), ${Math.round(sig.failureShare * 100)}% of tasks failing.`;
+      cause = `Actual ${ratio.toFixed(1)}x estimate, driven by retry storms: avg ${sig.avgRetries.toFixed(1)} retries/task (peak ${sig.maxRetries}), ${Math.round(sig.failureShare * 100)}% of tasks failing.`;
     } else if (econ?.rising && econ.cpa_trend_pct !== null) {
-      cause = `Actual ${ratio.toFixed(1)}x estimate — cost creep: CPA drifted +${econ.cpa_trend_pct.toFixed(1)}% day-over-day, unnoticed at design time.`;
+      cause = `Actual ${ratio.toFixed(1)}x estimate, cost creep: CPA drifted +${econ.cpa_trend_pct.toFixed(1)}% day-over-day, unnoticed at design time.`;
     } else if (direction === "on-track") {
-      cause = `Tracks the design-time estimate within ${Math.abs(variancePct).toFixed(0)}% — ARC confirms SpecBridge got this one right.`;
+      cause = `Tracks the design-time estimate within ${Math.abs(variancePct).toFixed(0)}%: ARC confirms SpecBridge got this one right.`;
     } else if (direction === "over") {
-      cause = `Actual ${ratio.toFixed(1)}x estimate — running ${variancePct.toFixed(0)}% above the design-time number with no single dominant driver.`;
+      cause = `Actual ${ratio.toFixed(1)}x estimate, running ${variancePct.toFixed(0)}% above the design-time number with no single dominant driver.`;
     } else {
-      cause = `Actual ${Math.abs(variancePct).toFixed(0)}% below estimate — SpecBridge was conservative here.`;
+      cause = `Actual ${Math.abs(variancePct).toFixed(0)}% below estimate. SpecBridge was conservative here.`;
     }
 
     // Feedback for SpecBridge when the overrun is material.
     let nextAssume: string | null = null;
     if (ratio >= MATERIAL_OVERRUN) {
       if (sig.avgRetries >= 2) {
-        nextAssume = `Next estimate should assume a retry budget — price in ~${Math.ceil(sig.avgRetries)} retries/task for this tool class, not the happy path.`;
+        nextAssume = `Next estimate should assume a retry budget: price in ~${Math.ceil(sig.avgRetries)} retries/task for this tool class, not the happy path.`;
       } else if (econ?.rising) {
-        nextAssume = `Next estimate should assume cost drift — add a per-day creep allowance instead of a flat per-task figure.`;
+        nextAssume = `Next estimate should assume cost drift: add a per-day creep allowance instead of a flat per-task figure.`;
       } else {
         nextAssume = `Next estimate should be revised up toward the observed ${actual.toFixed(2)} CPA for this feature.`;
       }

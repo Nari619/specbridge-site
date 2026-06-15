@@ -106,7 +106,7 @@ export function DemoClient() {
         </p>
         <p className="mt-4 text-xs text-muted-foreground">
           Est. run cost at forecast volume: $
-          {usd.format(result.est_monthly_cost_usd.low)}–
+          {usd.format(result.est_monthly_cost_usd.low)} to $
           {usd.format(result.est_monthly_cost_usd.high)}/mo · modeled
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
@@ -161,7 +161,7 @@ export function DemoClient() {
         <p className="text-sm font-medium">
           {counts?.covered ?? 0}{" "}
           {(counts?.covered ?? 0) === 1 ? "tool is" : "tools are"} ready to
-          reuse as-is — schemas, examples, and repo pointers below.
+          reuse as-is: schemas, examples, and repo pointers below.
         </p>
       </div>
     ) : (
@@ -232,7 +232,7 @@ export function DemoClient() {
           )}
         </Button>
         <p className="text-xs text-muted-foreground">
-          Demo runs against a live registry of 100 sample banking tools —
+          Demo runs against a live registry of 100 sample banking tools.
           SpecBridge works with any enterprise tool registry.
         </p>
       </div>

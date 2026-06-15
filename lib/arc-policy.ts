@@ -11,14 +11,14 @@ export const TASK_RULES: Record<InterventionType, string> = {
   warn: "Per-task rule: if a session's cost crosses 80% of the contract's max_cost_per_task_usd, emit WARN.",
   throttle:
     "Per-task rule: if a session's cost crosses 95% of the contract's max_cost_per_task_usd, emit THROTTLE.",
-  stop: "Per-task rule: if a session's cost reaches 100% of the contract's max_cost_per_task_usd, emit STOP — the session is terminated and its remaining cost is not spent.",
+  stop: "Per-task rule: if a session's cost reaches 100% of the contract's max_cost_per_task_usd, emit STOP: the session is terminated and its remaining cost is not spent.",
 };
 
 export const FLEET_RULES: Record<InterventionType, string> = {
   warn: "Per-fleet rule: if cumulative daily spend crosses 80% of the contract's daily_fleet_ceiling_usd, emit WARN.",
   throttle:
     "Per-fleet rule: if cumulative daily spend crosses 95% of the contract's daily_fleet_ceiling_usd, emit THROTTLE.",
-  stop: "Per-fleet rule: if cumulative daily spend reaches 100% of the contract's daily_fleet_ceiling_usd, emit STOP — the agent fleet is halted for the rest of the UTC day and queued sessions do not run.",
+  stop: "Per-fleet rule: if cumulative daily spend reaches 100% of the contract's daily_fleet_ceiling_usd, emit STOP: the agent fleet is halted for the rest of the UTC day and queued sessions do not run.",
 };
 
 const THRESHOLDS: { pct: 80 | 95 | 100; type: InterventionType }[] = [
@@ -173,7 +173,7 @@ export function runPolicy(
           session,
           pct,
           ruleText,
-          `Session cost reached $${session.cost_usd.toFixed(2)}, ${Math.round((session.cost_usd / cap) * 100)}% of the $${cap.toFixed(2)} per-task cap — terminated at the cap; $${saved.toFixed(2)} remaining not spent (modeled).`,
+          `Session cost reached $${session.cost_usd.toFixed(2)}, ${Math.round((session.cost_usd / cap) * 100)}% of the $${cap.toFixed(2)} per-task cap: terminated at the cap; $${saved.toFixed(2)} remaining not spent (modeled).`,
           atFraction(pct),
         );
       } else {

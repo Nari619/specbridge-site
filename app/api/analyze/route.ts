@@ -295,9 +295,9 @@ function buildRiskBlock(
 ): RiskBlock {
   if (missing.length > 0) {
     return {
-      missing_clearance: `${missing.join(", ")} — required for the data this capability handles, absent on ${tool.name}`,
+      missing_clearance: `${missing.join(", ")}: required for the data this capability handles, absent on ${tool.name}`,
       unblock_contact: "compliance-review@meridianbank.example",
-      est_unblock_time: "2–4 weeks for clearance review · modeled",
+      est_unblock_time: "2 to 4 weeks for clearance review · modeled",
     };
   }
   return {
@@ -462,7 +462,7 @@ export async function POST(request: Request) {
   }
   if (prd.length > 12000) {
     return NextResponse.json(
-      { error: "PRD is too long for the demo — keep it under 12,000 characters." },
+      { error: "PRD is too long for the demo. Keep it under 12,000 characters." },
       { status: 400 },
     );
   }
@@ -520,7 +520,7 @@ export async function POST(request: Request) {
     }
     if (error instanceof Anthropic.RateLimitError) {
       return NextResponse.json(
-        { error: "The demo is rate-limited right now — try again in a minute." },
+        { error: "The demo is rate-limited right now. Try again in a minute." },
         { status: 429 },
       );
     }

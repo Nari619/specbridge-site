@@ -44,7 +44,7 @@
       "task_type": "Match supplier invoices to purchase orders and ledger entries",
       "max_cost_per_task_usd": 0.4,
       "daily_fleet_ceiling_usd": 250,
-      "escalation_rule": "Warn the owning team at 75% of the daily ceiling; hard-stop the fleet at the ceiling — reconciliation is never time-critical.",
+      "escalation_rule": "Warn the owning team at 75% of the daily ceiling; hard-stop the fleet at the ceiling. Reconciliation is never time-critical.",
       "regulatory_tags": [
         "audit-grade"
       ],
@@ -56,7 +56,7 @@
       "task_type": "Classify and route inbound support messages",
       "max_cost_per_task_usd": 0.15,
       "daily_fleet_ceiling_usd": 100,
-      "escalation_rule": "Warn the owner at 75% of the daily ceiling; throttle to half throughput at 90%; never stop fully — fall back to keyword routing.",
+      "escalation_rule": "Warn the owner at 75% of the daily ceiling; throttle to half throughput at 90%; never stop fully. Fall back to keyword routing.",
       "regulatory_tags": [
         "pii-handling"
       ],

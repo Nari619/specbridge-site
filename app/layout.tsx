@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpecBridge AI — Know what's built. Before you build.",
+  title: "SpecBridge AI: Know what's built. Before you build.",
   description:
-    "SpecBridge AI is an engineering readiness platform for product managers. It maps what your org has already shipped and scores every spec against it — before a single ticket is written.",
+    "SpecBridge AI is an engineering readiness platform for product managers. It maps what your org has already shipped and scores every spec against it, before a single ticket is written.",
 };
 
 export default function RootLayout({

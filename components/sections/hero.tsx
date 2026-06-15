@@ -20,8 +20,8 @@ export function Hero() {
           Before you build.
         </h1>
         <p className="mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">
-          SpecBridge reads your org&rsquo;s tool registry — the structural
-          metadata of what&rsquo;s already built — and scores every spec
+          SpecBridge reads your org&rsquo;s tool registry, the structural
+          metadata of what&rsquo;s already built, and scores every spec
           against it. No duplicated work, no surprise dependencies.
         </p>
         <div className="mt-10 flex items-center gap-3">

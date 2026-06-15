@@ -4,7 +4,7 @@ import { PlatformNav } from "@/components/arc/platform-nav";
 import { LifecycleBanner } from "@/components/arc/lifecycle-banner";
 
 export const metadata: Metadata = {
-  title: "Demo — SpecBridge AI",
+  title: "Demo: SpecBridge AI",
   description:
     "Score a PRD against a seeded enterprise tool registry and get a live readiness report.",
 };

@@ -109,7 +109,7 @@ function ReuseSection({ reuse }: { reuse: ReuseDetails }) {
         </Field>
         <Field label="Cost per call">
           {reuse.est_cost_per_call_usd
-            ? `$${reuse.est_cost_per_call_usd.low}–${reuse.est_cost_per_call_usd.high} · modeled`
+            ? `$${reuse.est_cost_per_call_usd.low} to $${reuse.est_cost_per_call_usd.high} · modeled`
             : "—"}
         </Field>
       </div>
@@ -208,7 +208,7 @@ export function CapabilityCard({ capability }: { capability: Capability }) {
                     {plan.modify_effort_days === 1 ? "day" : "days"} to modify
                     vs {plan.build_new_effort_weeks}{" "}
                     {plan.build_new_effort_weeks === 1 ? "week" : "weeks"} to
-                    build —{" "}
+                    build,{" "}
                     <span className="text-brand">
                       saves ~{fmtMoney(plan.est_savings_usd)}
                     </span>{" "}
@@ -260,7 +260,7 @@ export function CapabilityCard({ capability }: { capability: Capability }) {
                       · modeled
                     </Field>
                     <Field label="Est. run cost">
-                      ${usd.format(capability.build_pack.est_monthly_run_cost_usd.low)}–
+                      ${usd.format(capability.build_pack.est_monthly_run_cost_usd.low)} to $
                       {usd.format(capability.build_pack.est_monthly_run_cost_usd.high)}
                       /mo · modeled
                     </Field>
@@ -276,8 +276,8 @@ export function CapabilityCard({ capability }: { capability: Capability }) {
                           <li key={m.tool} className="text-muted-foreground">
                             <span className="font-mono text-xs text-foreground">
                               {m.tool}
-                            </span>{" "}
-                            — {m.reason}
+                            </span>
+                            : {m.reason}
                           </li>
                         ))}
                       </ul>

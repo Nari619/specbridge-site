@@ -14,7 +14,7 @@ export function Vision() {
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-neutral-400">
             Readiness scores are the start. SpecBridge is becoming the living
-            map between product intent and engineering reality — so nothing
+            map between product intent and engineering reality, so nothing
             gets built twice, and nothing ships blind.
           </p>
         </FadeIn>

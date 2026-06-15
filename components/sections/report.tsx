@@ -24,7 +24,7 @@ const rows = [
   {
     status: "Gap",
     name: "EU tax calculation",
-    note: "no owner found — flag before kickoff",
+    note: "no owner found: flag before kickoff",
   },
 ];
 
@@ -64,13 +64,13 @@ export function Report() {
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    Checkout v2 — readiness
+                    Checkout v2: readiness
                   </p>
                   <p className="mt-1 text-5xl font-semibold tracking-tight tabular-nums">
                     68<span className="text-brand">%</span>
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Est. run cost at forecast volume: $1,400–2,100/mo · modeled
+                    Est. run cost at forecast volume: $1,400 to $2,100/mo · modeled
                   </p>
                 </div>
                 <p className="text-sm text-muted-foreground">

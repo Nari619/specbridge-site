@@ -3,11 +3,11 @@ import { FadeIn } from "@/components/fade-in";
 const steps = [
   {
     title: "Connect your sources",
-    body: "Your MCP tool registry (Kong, JFrog, or internal catalog) plus Confluence and Jira. Metadata only — never your source code. Security teams clear it in days, not quarters.",
+    body: "Your MCP tool registry (Kong, JFrog, or internal catalog) plus Confluence and Jira. Metadata only. Never your source code. Security teams clear it in days, not quarters.",
   },
   {
     title: "SpecBridge maps reality",
-    body: "A live graph of what's shipped, what's in flight, and what's deprecated — across every team.",
+    body: "A live graph of what's shipped, what's in flight, and what's deprecated, across every team.",
   },
   {
     title: "Write your spec",
@@ -15,7 +15,7 @@ const steps = [
   },
   {
     title: "Get your readiness score",
-    body: "Overlaps, gaps, and hidden dependencies — scored 0 to 100, each with an owner attached.",
+    body: "Overlaps, gaps, and hidden dependencies, scored 0 to 100, each with an owner attached.",
   },
   {
     title: "Hand off with confidence",

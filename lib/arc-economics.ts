@@ -87,18 +87,18 @@ export function computeEconomics(
     if (value === "unknown") {
       verdict = "UNMEASURED";
       note =
-        "Business value per task is not instrumented — instrument value first. No ROI is computed or guessed for unmeasured agents.";
+        "Business value per task is not instrumented. Instrument value first. No ROI is computed or guessed for unmeasured agents.";
     } else if (cpa === null) {
       verdict = "UNMEASURED";
-      note = "No completed tasks in the window — CPA is undefined.";
+      note = "No completed tasks in the window. CPA is undefined.";
     } else if (roi !== null && roi < 1) {
       verdict = "UNECONOMIC";
       note = `Each completed task costs more than it returns (ROI ${roi.toFixed(2)}x, modeled).`;
     } else if ((roi !== null && roi <= 3) || rising) {
       verdict = "REVIEW";
       note = rising
-        ? `CPA rose ${trendPct!.toFixed(1)}% day-over-day${roi !== null ? ` while ROI sits at ${roi.toFixed(1)}x` : ""} — investigate the drift (modeled).`
-        : `ROI of ${roi!.toFixed(1)}x is inside the 1–3x review band (modeled).`;
+        ? `CPA rose ${trendPct!.toFixed(1)}% day-over-day${roi !== null ? ` while ROI sits at ${roi.toFixed(1)}x` : ""}: investigate the drift (modeled).`
+        : `ROI of ${roi!.toFixed(1)}x is inside the 1 to 3x review band (modeled).`;
     } else {
       verdict = "HEALTHY";
       note = `ROI ${roi!.toFixed(1)}x with stable CPA (modeled).`;

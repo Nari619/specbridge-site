@@ -21,7 +21,7 @@ export function Problem() {
             already has.
           </p>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            Not because engineers want to — because nobody could see it at spec
+            Not because engineers want to, because nobody could see it at spec
             time. The knowledge was there. It just lived in someone else&rsquo;s
             repo, sprint, or head.
           </p>

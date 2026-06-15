@@ -6,7 +6,7 @@ import { computeEconomics } from "@/lib/arc-economics";
 import { PrintButton } from "@/components/arc/print-button";
 
 export const metadata: Metadata = {
-  title: "Operational Evidence Report — Agent Cost Governance",
+  title: "Operational Evidence Report: Agent Cost Governance",
 };
 
 const ORG_NAME = "Meridian Bank, N.A.";
@@ -58,12 +58,12 @@ export default function EvidencePage() {
           {ORG_NAME}
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
-          Operational Evidence Report — Agent Cost Governance
+          Operational Evidence Report: Agent Cost Governance
         </h1>
         <dl className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs text-neutral-600">
           <dt className="font-semibold">Reporting period</dt>
           <dd>
-            {fmtTs(new Date(SIM_START).toISOString())} —{" "}
+            {fmtTs(new Date(SIM_START).toISOString())} to{" "}
             {fmtTs(new Date(SIM_END).toISOString())} (48 hours)
           </dd>
           <dt className="font-semibold">Generated</dt>
@@ -106,7 +106,7 @@ export default function EvidencePage() {
                 {c.regulatory_tags.map((tag) => (
                   <span key={tag} className="block">
                     <span className="font-mono text-xs">{tag}</span>
-                    {TAG_THEMES[tag] ? ` — ${TAG_THEMES[tag]}` : ""}
+                    {TAG_THEMES[tag] ? `: ${TAG_THEMES[tag]}` : ""}
                   </span>
                 ))}
               </dd>
@@ -130,7 +130,7 @@ export default function EvidencePage() {
               className="evidence-entry border-b border-neutral-200 pb-3"
             >
               <p className="font-semibold">
-                {String(i + 1).padStart(3, "0")}. {fmtTs(iv.timestamp)} —{" "}
+                {String(i + 1).padStart(3, "0")}. {fmtTs(iv.timestamp)}:{" "}
                 {iv.type.toUpperCase()} ({iv.scope}, {iv.threshold_pct}%
                 threshold)
               </p>

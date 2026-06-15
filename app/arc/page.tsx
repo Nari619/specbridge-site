@@ -19,7 +19,7 @@ import {
 } from "@/components/arc/status-styles";
 
 export const metadata: Metadata = {
-  title: "ARC — runtime governance · SpecBridge",
+  title: "ARC: runtime governance · SpecBridge",
   description:
     "ARC is the runtime layer. SpecBridge estimates; ARC measures what your agents actually cost and governs them against their contracts.",
 };
@@ -84,7 +84,7 @@ export default function ArcPage() {
             Govern what your agents actually cost.
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
-            ARC — the runtime layer.{" "}
+            ARC: the runtime layer.{" "}
             <span className="text-foreground">SpecBridge estimates; ARC measures.</span>{" "}
             It replays a 48-hour agent fleet against its cost contracts, enforces
             every threshold, and feeds the actuals back to correct the next
@@ -226,7 +226,7 @@ export default function ArcPage() {
             </h2>
             <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
               Cost-per-action, ROI-per-run, and day-over-day trend. Agents with
-              uninstrumented value are reported honestly as UNMEASURED — no
+              uninstrumented value are reported honestly as UNMEASURED, no
               return is guessed. All figures modeled.
             </p>
             <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -300,7 +300,7 @@ export default function ArcPage() {
               Enforcement summary
             </h2>
             <p className="mt-3 max-w-xl leading-relaxed text-muted-foreground">
-              Per-agent contract enforcement over the window — raw vs governed
+              Per-agent contract enforcement over the window: raw vs governed
               spend, and what each control prevented. Savings modeled.
             </p>
             <div className="mt-8 overflow-x-auto rounded-2xl border bg-card shadow-sm">

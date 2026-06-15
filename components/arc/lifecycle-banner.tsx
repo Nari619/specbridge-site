@@ -14,8 +14,8 @@ export function LifecycleBanner({ from }: { from: "demo" | "arc" }) {
       <p className="text-muted-foreground">
         <span className="font-medium text-foreground">
           Same feature, two moments
-        </span>{" "}
-        — SpecBridge plans it, ARC measures it. In production these run weeks
+        </span>
+        : SpecBridge plans it, ARC measures it. In production these run weeks
         apart; joined here so the full lifecycle is visible.
       </p>
       <Link href={href} className="shrink-0 font-medium text-brand hover:underline">
