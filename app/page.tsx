@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/logo-mark";
 import { Hero } from "@/components/sections/hero";
 import { Problem } from "@/components/sections/problem";
 import { HowItWorks } from "@/components/sections/how-it-works";
@@ -11,17 +12,22 @@ export default function Home() {
     <>
       <header className="absolute inset-x-0 top-0 z-20">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
-          <a href="#" className="text-lg font-semibold tracking-tight">
-            SpecBridge<span className="text-brand">.</span>
+          <a
+            href="#"
+            className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight"
+          >
+            <LogoMark className="size-[22px]" />
+            <span>
+              SpecBridge<span className="text-brand">.</span>
+            </span>
           </a>
           <Button
-            variant="outline"
             size="sm"
-            className="rounded-md px-3 transition-colors duration-200 ease-out"
+            className="rounded-md bg-brand px-3.5 text-white transition-colors duration-200 ease-out hover:bg-brand/90"
             nativeButton={false}
             render={<a href="/demo" />}
           >
-            Get started
+            Try the live demo →
           </Button>
         </div>
       </header>

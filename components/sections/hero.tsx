@@ -3,8 +3,17 @@ import { ReadinessArc } from "@/components/readiness-arc";
 
 export function Hero() {
   return (
-    <section className="flex min-h-screen flex-col items-center justify-center px-6 pt-32 pb-24">
-      <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
+    <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pt-32 pb-24">
+      {/* Subtle brand glow over the themed base — premium, calm, not flashy. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(58% 42% at 50% 30%, color-mix(in oklch, var(--brand) 16%, transparent), transparent 72%)",
+        }}
+      />
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center text-center">
         <h1 className="text-[52px] leading-[1.02] font-semibold tracking-[-0.045em] text-balance sm:text-7xl lg:text-[88px]">
           Know what&rsquo;s built.
           <br />
