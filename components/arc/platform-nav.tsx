@@ -6,12 +6,12 @@ const linkClass = (active: boolean) =>
     ? "font-medium text-foreground"
     : "text-muted-foreground transition-colors duration-200 ease-out hover:text-foreground";
 
-/** Shared top nav so /demo and /arc read as one platform. */
+/** Shared top nav so /demo, /arc, and /dashboard read as one platform. */
 export function PlatformNav({
   active,
   showTagline = true,
 }: {
-  active: "demo" | "arc";
+  active: "demo" | "arc" | "dashboard";
   showTagline?: boolean;
 }) {
   return (
@@ -39,6 +39,12 @@ export function PlatformNav({
           </Link>
           <Link href="/arc" className={linkClass(active === "arc")}>
             ARC
+          </Link>
+          <Link
+            href="/dashboard"
+            className={linkClass(active === "dashboard")}
+          >
+            Dashboard
           </Link>
           <Link
             href="/"
