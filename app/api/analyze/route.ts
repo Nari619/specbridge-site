@@ -443,6 +443,69 @@ function validate(
   };
 }
 
+/** Derive a short title from the PRD: first non-empty line, capped to ~6 words. */
+function deriveTitle(prd: string): string {
+  const firstLine = prd
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l.length > 0);
+  if (!firstLine) return "Untitled analysis";
+  const words = firstLine.split(/\s+/);
+  const short = words.slice(0, 6).join(" ");
+  return words.length > 6 ? `${short}…` : short;
+}
+
+/**
+ * Persist a completed analysis to the Supabase "analyses" table for memory.
+ * Best-effort and fully isolated: any failure (including a missing-env import
+ * crash) is caught and logged so the user's analysis is never blocked or
+ * broken by the save. Awaited so the insert completes before the serverless
+ * function returns (a fire-and-forget insert can be dropped when the function
+ * freezes).
+ */
+async function saveAnalysis(
+  prdText: string,
+  result: AnalysisResult,
+): Promise<void> {
+  try {
+    const { supabase } = await import("@/lib/supabase");
+
+    const counts = { covered: 0, partial: 0, risky: 0, missing: 0 };
+    for (const c of result.capabilities) counts[c.status] += 1;
+
+    const savings_estimate = result.capabilities.reduce(
+      (sum, c) => sum + (c.modification_plan?.est_savings_usd ?? 0),
+      0,
+    );
+
+    const { error } = await supabase.from("analyses").insert({
+      prd_text: prdText,
+      prd_title: deriveTitle(prdText),
+      readiness_score: result.readiness_score,
+      verdict: result.verdict,
+      covered_count: counts.covered,
+      partial_count: counts.partial,
+      risky_count: counts.risky,
+      missing_count: counts.missing,
+      est_monthly_cost_low: result.est_monthly_cost_usd.low,
+      est_monthly_cost_high: result.est_monthly_cost_usd.high,
+      savings_estimate,
+      full_result: result,
+    });
+
+    if (error) {
+      console.error("[analyze] failed to save analysis:", error.message);
+    } else {
+      console.log("[analyze] saved analysis to Supabase");
+    }
+  } catch (e) {
+    console.error(
+      "[analyze] save step failed, returning the analysis anyway:",
+      e instanceof Error ? e.message : e,
+    );
+  }
+}
+
 export async function POST(request: Request) {
   let prd: unknown;
   try {
@@ -546,6 +609,9 @@ export async function POST(request: Request) {
       { status: 502 },
     );
   }
+
+  // Save to Supabase for memory — best-effort, never blocks or breaks the response.
+  await saveAnalysis(prd, result);
 
   return NextResponse.json(result);
 }
