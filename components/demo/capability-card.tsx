@@ -112,6 +112,9 @@ function ReuseSection({ reuse }: { reuse: ReuseDetails }) {
             ? `$${reuse.est_cost_per_call_usd.low} to $${reuse.est_cost_per_call_usd.high} · modeled`
             : "—"}
         </Field>
+        {reuse.stack && reuse.stack.length > 0 && (
+          <Field label="Built with">{reuse.stack.join(", ")}</Field>
+        )}
       </div>
 
       {reuse.input_parameters.length > 0 && (

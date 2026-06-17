@@ -16,6 +16,7 @@ export type RegistryTool = {
   compliance_tags: string[];
   status: string;
   est_cost_per_call_usd: { low: number; high: number };
+  stack: string[] | null;
   example_call: unknown;
   example_response: unknown;
 };
@@ -31,6 +32,7 @@ type ToolRow = {
   compliance_tags: unknown;
   status: string | null;
   est_cost_per_call_usd: number | string | null;
+  stack: unknown;
   docs_url: string | null;
   repo_path: string | null;
   version: string | null;
@@ -73,6 +75,7 @@ function mapRow(row: ToolRow): RegistryTool {
     // DB stores a single point estimate; the legacy shape uses a {low, high}
     // band, so map the point to a degenerate range (low === high).
     est_cost_per_call_usd: { low: costVal, high: costVal },
+    stack: Array.isArray(row.stack) ? row.stack.map(String) : null,
     // Not present in the Supabase schema; the legacy shape carries these.
     example_call: null,
     example_response: null,

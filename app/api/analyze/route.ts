@@ -38,6 +38,7 @@ export type ReuseDetails = {
   repo_path: string | null;
   compliance_tags: string[];
   est_cost_per_call_usd: { low: number; high: number } | null;
+  stack: string[] | null;
   input_parameters: { name: string; type: string; required: boolean }[];
   example_call: unknown;
   example_response: unknown;
@@ -195,6 +196,7 @@ function reuseFromRegistry(tool: RegistryTool): ReuseDetails {
     repo_path: tool.repo_path,
     compliance_tags: tool.compliance_tags,
     est_cost_per_call_usd: tool.est_cost_per_call_usd,
+    stack: tool.stack ?? null,
     input_parameters: tool.input_parameters.map((p) => ({
       name: p.name,
       type: p.type,
@@ -218,6 +220,7 @@ function normalizeReuse(v: unknown): ReuseDetails | null {
       ? o.compliance_tags.map(String)
       : [],
     est_cost_per_call_usd: range(o.est_cost_per_call_usd),
+    stack: Array.isArray(o.stack) ? o.stack.map(String) : null,
     input_parameters: Array.isArray(o.input_parameters)
       ? o.input_parameters
           .map((p) => asObject(p))
