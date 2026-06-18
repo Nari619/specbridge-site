@@ -23,6 +23,25 @@ const LLM_STATUSES = ["covered", "partial", "missing"] as const;
 // is ignored, so a hallucinated tag can never trigger a risky flag.
 const KNOWN_CLEARANCES = ["pii-cleared", "audit-grade"] as const;
 
+// Sensitive-data signals for the deterministic PII backstop. Case-insensitive,
+// matched whole-word. Extend this list to broaden the backstop.
+const PII_SIGNALS = [
+  "pii",
+  "ssn",
+  "social security",
+  "personal data",
+  "customer data",
+  "account number",
+  "date of birth",
+  "kyc",
+  "passport",
+  "credit card",
+] as const;
+
+const PII_SIGNAL_PATTERNS = PII_SIGNALS.map(
+  (s) => new RegExp(`\\b${s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"),
+);
+
 const STATUS_WEIGHTS: Record<CapabilityStatus, number> = {
   covered: 1,
   partial: 0.5,
@@ -311,6 +330,38 @@ function buildRiskBlock(
 }
 
 /**
+ * Deterministic PII backstop. Scans a capability's own text (requirement +
+ * justification) for hardcoded sensitive-data signals and, if any is found,
+ * ADDS "pii-cleared" to its required_clearances. Code can only strengthen the
+ * requirement — it never removes a clearance the LLM flagged. Fail-safe: if the
+ * scan throws for any reason, "pii-cleared" is added anyway (over-flag, never
+ * under-flag). Runs before applyComplianceRules, which then reads the
+ * possibly-strengthened required_clearances unchanged.
+ */
+function deterministicPiiScan(capability: Capability): Capability {
+  // Already required by the LLM — nothing to add.
+  if (capability.required_clearances.includes("pii-cleared")) {
+    return capability;
+  }
+
+  let touchesPii: boolean;
+  try {
+    const text = `${capability.requirement} ${capability.justification}`;
+    touchesPii = PII_SIGNAL_PATTERNS.some((re) => re.test(text));
+  } catch {
+    // Fail safe: on any scan error, over-flag rather than under-flag.
+    touchesPii = true;
+  }
+
+  if (!touchesPii) return capability;
+
+  return {
+    ...capability,
+    required_clearances: [...capability.required_clearances, "pii-cleared"],
+  };
+}
+
+/**
  * Deterministic risky decision. Code — not the LLM — owns risky/not-risky:
  * a matched tool is RISKY when a clearance the capability requires is absent
  * from the tool's registry compliance_tags, or when the tool is deprecated.
@@ -405,8 +456,12 @@ function validate(
     });
   }
 
+  // Deterministic PII backstop strengthens required_clearances in code before
+  // the gate sees them; the gate logic itself is unchanged.
+  const guarded = capabilities.map(deterministicPiiScan);
+
   // Deterministic risky decision happens here — not in the LLM.
-  const finalCapabilities = capabilities.map((c) =>
+  const finalCapabilities = guarded.map((c) =>
     applyComplianceRules(c, toolMap),
   );
 
