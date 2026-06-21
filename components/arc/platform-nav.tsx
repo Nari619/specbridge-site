@@ -37,9 +37,6 @@ export function PlatformNav({
           <Link href="/demo" className={linkClass(active === "demo")}>
             Demo
           </Link>
-          <Link href="/arc" className={linkClass(active === "arc")}>
-            ARC
-          </Link>
           <Link
             href="/dashboard"
             className={linkClass(active === "dashboard")}

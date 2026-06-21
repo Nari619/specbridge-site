@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { DemoClient } from "@/components/demo/demo-client";
 import { PlatformNav } from "@/components/arc/platform-nav";
-import { LifecycleBanner } from "@/components/arc/lifecycle-banner";
 
 export const metadata: Metadata = {
   title: "Demo: SpecBridge AI",
@@ -28,9 +27,6 @@ export default function DemoPage() {
             capabilities, matches each against an enterprise internal tool
             registry, and returns a readiness verdict.
           </p>
-          <div className="mt-8">
-            <LifecycleBanner from="demo" />
-          </div>
           <div className="mt-12">
             <DemoClient />
           </div>
