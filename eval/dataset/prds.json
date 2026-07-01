@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "target_prd_count": 50,
+  "notes": "Test PRDs for the SpecBridge accuracy harness. Each entry declares the expected engine output so the runner can measure precision, recall, compliance-gate accuracy, and cost. Tool names must match rows in the Supabase `tools` registry. Extend by appending to `prds`.",
+  "prds": [
+    {
+      "id": "prd_001",
+      "title": "Monthly Savings Statement Generator",
+      "domain": "accounts",
+      "prd_text": "For each customer savings account, generate a monthly PDF statement. The service pulls the account balance as of the statement date, fetches all transactions for the month, produces a formatted PDF statement, and writes an audit-log entry recording the generation event. Statements are made available in the customer's document center; downstream delivery to email or push is handled by the existing document-center subscription and is out of scope for this PRD. Target: ~800,000 statements per month across the retail savings book.",
+      "expected_matches": [
+        {
+          "capability": "Fetch all transactions for the statement month",
+          "expected_status": "covered",
+          "expected_tool": "transaction_history_api",
+          "notes": "Purpose-built for account transaction history; carries both pii-cleared and audit-grade, which satisfy the deterministic gate for a capability that touches customer transaction data."
+        },
+        {
+          "capability": "Get the account balance as of the statement date",
+          "expected_status": "covered",
+          "expected_tool": "account_balance_service",
+          "notes": "Direct match; balance service has pii-cleared. Capability touches customer PII (account balance) and is satisfied by the tag."
+        },
+        {
+          "capability": "Generate a formatted PDF statement",
+          "expected_status": "covered",
+          "expected_tool": "statement_generator",
+          "notes": "Purpose-built statement PDF generator; pii-cleared."
+        },
+        {
+          "capability": "Write an immutable audit-log entry for the generation event",
+          "expected_status": "covered",
+          "expected_tool": "audit_log_writer",
+          "notes": "Standard audit-logging tool; has audit-grade and pii-cleared."
+        }
+      ],
+      "expected_verdict": "GO",
+      "expected_score_range": [85, 100]
+    },
+    {
+      "id": "prd_002",
+      "title": "Custom Card Rewards Categories",
+      "domain": "cards",
+      "prd_text": "Cardholders can choose one merchant category per calendar quarter to earn 3x reward points on eligible spend in that category. Standard 1x points on all other spend continues. The customer's chosen category persists for the quarter and cannot be changed mid-quarter. Cardholders see a monthly breakdown of points earned by category. One week before quarter end, cardholders are notified to pick next quarter's category. Volume: ~150,000 active cardholders across the portfolio.",
+      "expected_matches": [
+        {
+          "capability": "Categorize each card transaction by merchant type",
+          "expected_status": "covered",
+          "expected_tool": "transaction_categorizer",
+          "notes": "Direct match; carries pii-cleared for customer transaction data."
+        },
+        {
+          "capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
+          "expected_status": "partial",
+          "expected_tool": "rewards_points_engine",
+          "notes": "Tool exists for standard rewards calculation but has no input for a per-customer category override; needs a modification to accept the chosen category and apply the multiplier. Genuine parameter-level gap."
+        },
+        {
+          "capability": "Persist each customer's chosen category for the quarter",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No registry tool handles customer preference / category-selection storage; needs a new service or an extension outside the current registry surface."
+        },
+        {
+          "capability": "Send cardholders a monthly points-by-category breakdown",
+          "expected_status": "partial",
+          "expected_tool": "statement_generator",
+          "notes": "Statement generator produces monthly account PDFs; a rewards-specific breakdown template is a modification to its output set."
+        },
+        {
+          "capability": "Notify cardholders one week before quarter end to pick next quarter's category",
+          "expected_status": "risky",
+          "expected_tool": "notification_dispatcher",
+          "notes": "notification_dispatcher has empty compliance_tags. The capability handles customer PII (name, contact channel); the PII backstop adds pii-cleared to required_clearances and the gate flips this to risky in code."
+        }
+      ],
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [45, 65]
+    },
+    {
+      "id": "prd_003",
+      "title": "Retail Cryptocurrency Custody & Trading",
+      "domain": "wealth",
+      "prd_text": "Offer retail customers custody of Bitcoin and Ethereum through the bank's mobile app. Customers can deposit, withdraw, and trade BTC and ETH against USD. Trades execute at prevailing market rates; the bank holds wallets in cold storage. All customer identities are KYC-verified and screened against AML and sanctions lists before crypto access is enabled. Real-time crypto prices are displayed in the app. All crypto transactions post to the general ledger and generate quarterly regulatory reports covering crypto activity.",
+      "expected_matches": [
+        {
+          "capability": "Custody customer Bitcoin and Ethereum wallets in cold storage",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No crypto custody tool exists in the registry; this is a novel capability the org must build."
+        },
+        {
+          "capability": "Execute buy/sell trades of BTC and ETH against USD",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "trade_execution_service covers equities and ETFs only; crypto assets are not in scope. Requires a new crypto trading service."
+        },
+        {
+          "capability": "Display real-time BTC and ETH prices in the app",
+          "expected_status": "partial",
+          "expected_tool": "market_data_feed",
+          "notes": "Existing market data feed provides equity and FX data; a crypto price feed is a modification / extension to its data source coverage."
+        },
+        {
+          "capability": "KYC-verify customer identity before enabling crypto access",
+          "expected_status": "covered",
+          "expected_tool": "kyc_verification_service",
+          "notes": "Standard KYC flow; has both pii-cleared and audit-grade."
+        },
+        {
+          "capability": "Screen customer against AML and sanctions lists",
+          "expected_status": "covered",
+          "expected_tool": "aml_screening_api",
+          "notes": "Standard AML screening; has audit-grade."
+        },
+        {
+          "capability": "Post crypto transactions to the general ledger",
+          "expected_status": "partial",
+          "expected_tool": "ledger_posting_service",
+          "notes": "Ledger tool exists but a new chart-of-accounts entry class is needed for crypto assets; modification to its accepted account types."
+        },
+        {
+          "capability": "Generate quarterly regulatory reports covering crypto activity",
+          "expected_status": "partial",
+          "expected_tool": "regulatory_report_builder",
+          "notes": "Report builder exists; the crypto-specific regulatory template is not part of its current filing set. Genuine parameter/template extension."
+        }
+      ],
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [40, 60]
+    }
+  ]
+}
