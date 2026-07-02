@@ -1,0 +1,228 @@
+{
+  "timestamp": "2026-07-02T00:17:29.158Z",
+  "dataset_version": 1,
+  "dataset_prd_count": 3,
+  "metrics": {
+    "match_precision": 0.6363636363636364,
+    "match_recall": 0.875,
+    "compliance_gate_accuracy": 0.375,
+    "verdict_accuracy": 0.5,
+    "score_in_range_accuracy": 0.5,
+    "avg_input_tokens": 22260,
+    "avg_output_tokens": 2376,
+    "avg_total_tokens": 24636,
+    "avg_cost_per_prd_usd": 0.1024,
+    "total_run_cost_usd": 0.2048,
+    "prds_attempted": 3,
+    "prds_ok": 2,
+    "prds_failed": 1
+  },
+  "per_prd": [
+    {
+      "id": "prd_001",
+      "title": "Monthly Savings Statement Generator",
+      "ok": true,
+      "actual_verdict": "NO-GO",
+      "expected_verdict": "GO",
+      "verdict_match": false,
+      "actual_score": 70,
+      "expected_score_range": [
+        85,
+        100
+      ],
+      "score_in_range": false,
+      "paired_count": 4,
+      "expected_count": 4,
+      "actual_capability_count": 5,
+      "tool_pick_correct": 4,
+      "tool_pick_total": 4,
+      "expected_tool_total": 4,
+      "tool_precision": 1,
+      "tool_recall": 1,
+      "status_matches": 3,
+      "status_total": 4,
+      "status_accuracy": 0.75,
+      "usage": {
+        "input_tokens": 22260,
+        "output_tokens": 1759
+      },
+      "cost_usd": 0.093165,
+      "pair_details": [
+        {
+          "expected_capability": "Fetch all transactions for the statement month",
+          "actual_requirement": "Fetch all transactions for the statement month",
+          "expected_tool": "transaction_history_api",
+          "actual_tool": "transaction_history_api",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 1.5
+        },
+        {
+          "expected_capability": "Get the account balance as of the statement date",
+          "actual_requirement": "Pull account balance as of the statement date",
+          "expected_tool": "account_balance_service",
+          "actual_tool": "account_balance_service",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 1.167
+        },
+        {
+          "expected_capability": "Write an immutable audit-log entry for the generation event",
+          "actual_requirement": "Write an audit-log entry recording the statement generation event",
+          "expected_tool": "audit_log_writer",
+          "actual_tool": "audit_log_writer",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 1.167
+        },
+        {
+          "expected_capability": "Generate a formatted PDF statement",
+          "actual_requirement": "Produce a formatted PDF statement",
+          "expected_tool": "statement_generator",
+          "actual_tool": "statement_generator",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "partial",
+          "status_match": false,
+          "similarity": 1.1
+        }
+      ],
+      "unmatched_expected": [],
+      "unmatched_actual": [
+        {
+          "requirement": "Make the generated statement available in the customer's document center",
+          "status": "missing",
+          "matched_tool": null
+        }
+      ]
+    },
+    {
+      "id": "prd_002",
+      "title": "Custom Card Rewards Categories",
+      "ok": true,
+      "actual_verdict": "NO-GO",
+      "expected_verdict": "NO-GO",
+      "verdict_match": true,
+      "actual_score": 49,
+      "expected_score_range": [
+        45,
+        65
+      ],
+      "score_in_range": true,
+      "paired_count": 5,
+      "expected_count": 5,
+      "actual_capability_count": 9,
+      "tool_pick_correct": 3,
+      "tool_pick_total": 7,
+      "expected_tool_total": 4,
+      "tool_precision": 0.42857142857142855,
+      "tool_recall": 0.75,
+      "status_matches": 3,
+      "status_total": 5,
+      "status_accuracy": 0.6,
+      "usage": {
+        "input_tokens": 22260,
+        "output_tokens": 2993
+      },
+      "cost_usd": 0.111675,
+      "pair_details": [
+        {
+          "expected_capability": "Notify cardholders one week before quarter end to pick next quarter's category",
+          "actual_requirement": "Send notification to cardholders one week before quarter end to prompt next-quarter category selection",
+          "expected_tool": "notification_dispatcher",
+          "actual_tool": "notification_dispatcher",
+          "tool_match": true,
+          "expected_status": "risky",
+          "actual_status": "risky",
+          "status_match": true,
+          "similarity": 1.071
+        },
+        {
+          "expected_capability": "Categorize each card transaction by merchant type",
+          "actual_requirement": "Classify and match transaction merchant type to eligible reward categories",
+          "expected_tool": "transaction_categorizer",
+          "actual_tool": "transaction_categorizer",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 0.773
+        },
+        {
+          "expected_capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
+          "actual_requirement": "Cardholder selects one merchant category per quarter for 3x rewards",
+          "expected_tool": "rewards_points_engine",
+          "actual_tool": "rewards_points_engine",
+          "tool_match": true,
+          "expected_status": "partial",
+          "actual_status": "risky",
+          "status_match": false,
+          "similarity": 0.563
+        },
+        {
+          "expected_capability": "Send cardholders a monthly points-by-category breakdown",
+          "actual_requirement": "Monthly breakdown of points earned by category displayed to cardholder",
+          "expected_tool": "statement_generator",
+          "actual_tool": null,
+          "tool_match": false,
+          "expected_status": "partial",
+          "actual_status": "missing",
+          "status_match": false,
+          "similarity": 0.444
+        },
+        {
+          "expected_capability": "Persist each customer's chosen category for the quarter",
+          "actual_requirement": "Persist and enforce the chosen category for the full calendar quarter (no mid-quarter changes)",
+          "expected_tool": null,
+          "actual_tool": null,
+          "tool_match": false,
+          "expected_status": "missing",
+          "actual_status": "missing",
+          "status_match": true,
+          "similarity": 0.414
+        }
+      ],
+      "unmatched_expected": [],
+      "unmatched_actual": [
+        {
+          "requirement": "Apply 3x points multiplier for spend in the elected category and 1x on all other spend",
+          "status": "risky",
+          "matched_tool": "transaction_categorizer"
+        },
+        {
+          "requirement": "Retrieve cardholder profile and card account data to validate eligibility and link category election",
+          "status": "risky",
+          "matched_tool": "customer_profile_lookup"
+        },
+        {
+          "requirement": "Write immutable audit records for category elections and points decisions",
+          "status": "covered",
+          "matched_tool": "audit_log_writer"
+        },
+        {
+          "requirement": "Schedule and trigger the quarter-end reminder batch notification job",
+          "status": "covered",
+          "matched_tool": "batch_job_scheduler"
+        }
+      ]
+    },
+    {
+      "id": "prd_003",
+      "title": "Retail Cryptocurrency Custody & Trading",
+      "ok": false,
+      "error": "The model returned an unexpected format. Run the analysis again.",
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [
+        40,
+        60
+      ],
+      "expected_count": 7
+    }
+  ]
+}

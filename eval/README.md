@@ -6,22 +6,101 @@ Supabase registry, the LLM matcher, the deterministic PII backstop, and the
 compliance gate) and compares the engine's output to what a human labeler
 expected.
 
-**Status:** data foundation only. The dataset schema and 3 seeded PRDs are
-in place; the runner is not built yet.
+**Status:** runner in place. Runs locally with `npm run eval`. Full baseline
+below.
+
+---
+
+## Latest baseline
+
+First real run against the 3 seeded PRDs. **These are the numbers every future
+upgrade will be measured against.** Full detail in
+[`results/latest.json`](results/latest.json).
+
+| Metric | Value |
+|---|---|
+| **match_precision** | **63.6%** (7 / 11 correct tool picks) |
+| **match_recall** | **87.5%** (7 / 8 expected tools found) |
+| **compliance_gate_accuracy** | **37.5%** (6 / 16 status matches) |
+| **verdict_accuracy** | 50% (1 / 2 that completed) |
+| **score_in_range_accuracy** | 50% (1 / 2) |
+| **avg cost per PRD** | $0.10 |
+| **total run cost** | $0.20 |
+| **prds ok** | 2 / 3 (1 failed) |
+| avg input tokens | 22,260 |
+| avg output tokens | 2,376 |
+
+### How to interpret these numbers
+
+The headline **63.6% precision + 87.5% recall** show tool-matching is basically
+working: when the engine picks a tool, it's usually right, and it's finding
+almost every capability a labeler expects.
+
+**compliance_gate_accuracy at 37.5% is currently a label-quality signal, not
+an engine-quality signal.** Two things are driving it low:
+
+1. The initial labels were conservative in places (a lot of `partial`s where
+   the engine's PII backstop reasonably flips to `risky`).
+2. The engine legitimately decomposes some capabilities more finely than the
+   labels do (see the "over-decomposition" note under known issues).
+
+Neither means the gate is broken. Once the labels are revised in a review
+pass, this number should rise sharply. Watch for regressions on
+`match_precision` and `match_recall` first; treat `compliance_gate_accuracy`
+as a dataset-hygiene metric until the label review lands.
+
+---
+
+## Known issues surfaced by baseline
+
+1. **Complex PRDs (7+ capabilities) risk JSON truncation at
+   `max_tokens=4000`.** `prd_003` (crypto custody + trading, 7 expected
+   capabilities) failed with "unexpected format" — the model's structured JSON
+   response was almost certainly cut off mid-object. Needs fix before scaling
+   to 50 PRDs; options are a higher `max_tokens` cap, streaming with
+   reconstruction, or splitting big PRDs.
+2. **Labels need tightening.** The engine's PII backstop is stricter than
+   several initial labels (`rewards_points_engine` came back `risky` where
+   labeled `partial`). Labels will be revised after a review pass; this
+   directly moves `compliance_gate_accuracy`.
+3. **Engine may over-decompose PRDs vs labels.** `prd_001` produced a 5th
+   capability ("Make the statement available in the customer's document
+   center") that the labeled dataset explicitly marked out of scope; the
+   engine treated it as a requirement and flipped the verdict to NO-GO. Real
+   surface-tension between thoroughness and precision — decide which side to
+   land on as more PRDs come in.
+
+---
+
+## Running it
+
+```bash
+npm run eval
+```
+
+Reads `dataset/prds.json`, replays each PRD through the internal
+`runAnalysis()` function (the same pipeline `/demo` uses — no HTTP round-trip,
+no live-URL burn), and writes results to `results/latest.json`.
+
+Requires `.env.local` with `ANTHROPIC_API_KEY` and the
+`NEXT_PUBLIC_SUPABASE_*` vars set (already needed for `/demo`).
 
 ---
 
 ## What the harness measures
 
-For each PRD in the dataset, the harness will:
+For each PRD in the dataset, the harness:
 
-1. POST the `prd_text` to `/api/analyze`.
-2. Match each returned `capability` back to the labeled `expected_matches`
-   entry (by best textual overlap on the `capability`/`requirement` fields).
-3. Compare the returned `matched_tool` and `status` to the expected values.
-4. Compare the top-level `verdict` and `readiness_score` to the expected
+1. Calls `runAnalysis(prd_text)` directly (imported from
+   `app/api/analyze/route.ts` — same code path as the browser demo, skips the
+   Supabase save so evals don't pollute the memory dashboard).
+2. Matches each returned `capability` back to the labeled `expected_matches`
+   entry (by Jaccard overlap on tokenized text, with a boost for exact tool
+   matches).
+3. Compares the returned `matched_tool` and `status` to the expected values.
+4. Compares the top-level `verdict` and `readiness_score` to the expected
    verdict and score range.
-5. Record the analyze call's input/output token counts and the resulting
+5. Records the analyze call's input/output token counts and the resulting
    USD cost.
 
 The point is not to grade the LLM in isolation — it's to catch regressions in
@@ -179,8 +258,9 @@ Three PRDs are seeded to exercise the main engine paths. Target is 50 total.
 
 ---
 
-## What's NOT in scope for this PR
+## What's NOT in scope yet
 
-- The runner itself — nothing in this folder executes anything yet.
-- CI wiring — the harness will run locally first; CI hookup is later.
+- CI wiring — the harness runs locally first; automated CI hookup is later.
 - Cost-optimization heuristics — token cost is measured, not tuned.
+- Multi-run stability — the harness runs each PRD once. LLM variance across
+  runs is not yet averaged.

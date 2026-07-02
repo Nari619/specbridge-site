@@ -564,35 +564,28 @@ async function saveAnalysis(
   }
 }
 
-export async function POST(request: Request) {
-  let prd: unknown;
-  try {
-    ({ prd } = await request.json());
-  } catch {
-    return NextResponse.json(
-      { error: "Request body must be JSON with a `prd` field." },
-      { status: 400 },
-    );
-  }
+export type AnalyzeSuccess = {
+  ok: true;
+  result: AnalysisResult;
+  usage: { input_tokens: number; output_tokens: number };
+};
+export type AnalyzeFailure = { ok: false; error: string; httpStatus: number };
+export type AnalyzeOutcome = AnalyzeSuccess | AnalyzeFailure;
 
-  if (typeof prd !== "string" || prd.trim().length < 40) {
-    return NextResponse.json(
-      { error: "Paste a PRD of at least a few sentences to analyze." },
-      { status: 400 },
-    );
-  }
-  if (prd.length > 12000) {
-    return NextResponse.json(
-      { error: "PRD is too long for the demo. Keep it under 12,000 characters." },
-      { status: 400 },
-    );
-  }
-
+/**
+ * Core analysis pipeline. Loads the registry (Supabase with static fallback),
+ * builds the prompt, calls the model, then runs the deterministic PII backstop
+ * and compliance gate via validate(). Called by POST and directly by the eval
+ * harness; the eval path skips the Supabase save so evals don't pollute the
+ * memory dashboard. Behavior for POST callers is unchanged.
+ */
+export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
   if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json(
-      { error: "The demo isn't configured yet: ANTHROPIC_API_KEY is not set." },
-      { status: 500 },
-    );
+    return {
+      ok: false,
+      error: "The demo isn't configured yet: ANTHROPIC_API_KEY is not set.",
+      httpStatus: 500,
+    };
   }
 
   // Read the live registry from Supabase. The dynamic import keeps the Supabase
@@ -620,6 +613,7 @@ export async function POST(request: Request) {
   const client = new Anthropic();
 
   let text: string;
+  let usage: { input_tokens: number; output_tokens: number };
   try {
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
@@ -632,24 +626,19 @@ export async function POST(request: Request) {
       .filter((block) => block.type === "text")
       .map((block) => block.text)
       .join("");
+    usage = {
+      input_tokens: response.usage.input_tokens,
+      output_tokens: response.usage.output_tokens,
+    };
   } catch (error) {
     if (error instanceof Anthropic.AuthenticationError) {
-      return NextResponse.json(
-        { error: "The demo's API key is invalid. Check ANTHROPIC_API_KEY." },
-        { status: 500 },
-      );
+      return { ok: false, error: "The demo's API key is invalid. Check ANTHROPIC_API_KEY.", httpStatus: 500 };
     }
     if (error instanceof Anthropic.RateLimitError) {
-      return NextResponse.json(
-        { error: "The demo is rate-limited right now. Try again in a minute." },
-        { status: 429 },
-      );
+      return { ok: false, error: "The demo is rate-limited right now. Try again in a minute.", httpStatus: 429 };
     }
     if (error instanceof Anthropic.APIError) {
-      return NextResponse.json(
-        { error: "The analysis service had a hiccup. Try again." },
-        { status: 502 },
-      );
+      return { ok: false, error: "The analysis service had a hiccup. Try again.", httpStatus: 502 };
     }
     throw error;
   }
@@ -662,14 +651,47 @@ export async function POST(request: Request) {
   }
 
   if (!result) {
+    return {
+      ok: false,
+      error: "The model returned an unexpected format. Run the analysis again.",
+      httpStatus: 502,
+    };
+  }
+
+  return { ok: true, result, usage };
+}
+
+export async function POST(request: Request) {
+  let prd: unknown;
+  try {
+    ({ prd } = await request.json());
+  } catch {
     return NextResponse.json(
-      { error: "The model returned an unexpected format. Run the analysis again." },
-      { status: 502 },
+      { error: "Request body must be JSON with a `prd` field." },
+      { status: 400 },
     );
   }
 
-  // Save to Supabase for memory — best-effort, never blocks or breaks the response.
-  await saveAnalysis(prd, result);
+  if (typeof prd !== "string" || prd.trim().length < 40) {
+    return NextResponse.json(
+      { error: "Paste a PRD of at least a few sentences to analyze." },
+      { status: 400 },
+    );
+  }
+  if (prd.length > 12000) {
+    return NextResponse.json(
+      { error: "PRD is too long for the demo. Keep it under 12,000 characters." },
+      { status: 400 },
+    );
+  }
 
-  return NextResponse.json(result);
+  const outcome = await runAnalysis(prd);
+  if (!outcome.ok) {
+    return NextResponse.json({ error: outcome.error }, { status: outcome.httpStatus });
+  }
+
+  // Save to Supabase for memory — best-effort, never blocks or breaks the response.
+  await saveAnalysis(prd, outcome.result);
+
+  return NextResponse.json(outcome.result);
 }
