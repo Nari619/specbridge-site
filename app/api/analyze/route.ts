@@ -4,114 +4,43 @@ import registryJson from "@/data/registry.json";
 // Type-only import — erased at compile time, so it never triggers the Supabase
 // client module to load. The runtime fetch uses a dynamic import (see POST).
 import type { RegistryTool } from "@/lib/registry-source";
+import {
+  type AnalysisResult,
+  type Capability,
+  type CapabilityStatus,
+  type AnalyzeOutcome,
+  LLM_STATUSES,
+  KNOWN_CLEARANCES,
+  asObject,
+  range,
+  extractJson,
+  buildToolMap,
+  reuseFromRegistry,
+  normalizeReuse,
+  normalizeModificationPlan,
+  normalizeBuildPack,
+  finalizeAndScore,
+} from "@/lib/analyze-core";
+
+// Re-export the shared types so existing consumers that import them from this
+// route module keep working after the extraction into lib/analyze-core.
+export type {
+  AnalysisResult,
+  Capability,
+  ReuseDetails,
+  ModificationPlan,
+  RiskBlock,
+  BuildPack,
+  AnalyzeSuccess,
+  AnalyzeFailure,
+  AnalyzeOutcome,
+} from "@/lib/analyze-core";
 
 export const maxDuration = 60;
 
 // Static fallback registry. Used whenever the live Supabase registry can't be
 // read, so the demo never hard-crashes.
 const staticTools = registryJson.tools as unknown as RegistryTool[];
-
-const STATUSES = ["covered", "partial", "risky", "missing"] as const;
-type CapabilityStatus = (typeof STATUSES)[number];
-
-// "risky" is NOT assigned by the LLM. The model classifies functional fit only;
-// the risky/not-risky decision is made deterministically in code from the
-// registry's compliance_tags (see applyComplianceRules).
-const LLM_STATUSES = ["covered", "partial", "missing"] as const;
-
-// The only clearances code understands. A required_clearance outside this set
-// is ignored, so a hallucinated tag can never trigger a risky flag.
-const KNOWN_CLEARANCES = ["pii-cleared", "audit-grade"] as const;
-
-// Sensitive-data signals for the deterministic PII backstop. Case-insensitive,
-// matched whole-word. Extend this list to broaden the backstop.
-const PII_SIGNALS = [
-  "pii",
-  "ssn",
-  "social security",
-  "personal data",
-  "customer data",
-  "account number",
-  "date of birth",
-  "kyc",
-  "passport",
-  "credit card",
-] as const;
-
-const PII_SIGNAL_PATTERNS = PII_SIGNALS.map(
-  (s) => new RegExp(`\\b${s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i"),
-);
-
-const STATUS_WEIGHTS: Record<CapabilityStatus, number> = {
-  covered: 1,
-  partial: 0.5,
-  risky: 0.35,
-  missing: 0,
-};
-
-export type ReuseDetails = {
-  version: string | null;
-  owner_team: string | null;
-  owner_contact: string | null;
-  docs_url: string | null;
-  repo_path: string | null;
-  compliance_tags: string[];
-  est_cost_per_call_usd: { low: number; high: number } | null;
-  stack: string[] | null;
-  input_parameters: { name: string; type: string; required: boolean }[];
-  example_call: unknown;
-  example_response: unknown;
-};
-
-export type ModificationPlan = {
-  whats_missing: string;
-  change_needed: string;
-  modify_effort_days: number;
-  build_new_effort_weeks: number;
-  est_savings_usd: number;
-};
-
-export type RiskBlock = {
-  missing_clearance: string;
-  unblock_contact: string;
-  est_unblock_time: string;
-};
-
-export type BuildPack = {
-  draft_mcp_spec: unknown;
-  build_effort_weeks: number;
-  est_monthly_run_cost_usd: { low: number; high: number };
-  suggested_owner_team: string;
-  nearest_misses: { tool: string; reason: string }[];
-};
-
-export type Capability = {
-  requirement: string;
-  status: CapabilityStatus;
-  matched_tool: string | null;
-  justification: string;
-  /** clearances the capability needs (LLM-stated); code compares these to the
-   * matched tool's actual registry compliance_tags to decide RISKY */
-  required_clearances: string[];
-  reuse: ReuseDetails | null;
-  modification_plan: ModificationPlan | null;
-  risk_block: RiskBlock | null;
-  build_pack: BuildPack | null;
-};
-
-export type AnalysisResult = {
-  capabilities: Capability[];
-  readiness_score: number;
-  est_monthly_cost_usd: { low: number; high: number };
-  top_blocker: string;
-  verdict: "GO" | "NO-GO";
-  verdict_reasoning: string;
-  unblock_path: string;
-};
-
-function buildToolMap(tools: RegistryTool[]): Map<string, RegistryTool> {
-  return new Map(tools.map((t) => [t.name, t]));
-}
 
 const SYSTEM_PROMPT_BODY = `You are SpecBridge, an engineering-readiness analyst for product managers at an enterprise. You receive a PRD and must score it against the enterprise's internal MCP tool registry (provided below as JSON). The registry is the complete, authoritative list of tools that exist — do not invent tools.
 
@@ -172,229 +101,11 @@ function buildSystemPrompt(tools: RegistryTool[]): string {
   return `${SYSTEM_PROMPT_BODY}\n\nTOOL REGISTRY:\n${JSON.stringify({ tools }, null, 2)}`;
 }
 
-function extractJson(text: string): string {
-  // Strip markdown fences if the model added them despite instructions
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = (fenced ? fenced[1] : text).trim();
-  // Fall back to the outermost object if there's stray prose around it
-  const start = candidate.indexOf("{");
-  const end = candidate.lastIndexOf("}");
-  if (start === -1 || end <= start) return candidate;
-  return candidate.slice(start, end + 1);
-}
-
-function asObject(v: unknown): Record<string, unknown> | null {
-  return typeof v === "object" && v !== null && !Array.isArray(v)
-    ? (v as Record<string, unknown>)
-    : null;
-}
-
-function num(v: unknown): number | null {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : null;
-}
-
-function str(v: unknown): string | null {
-  return typeof v === "string" && v.trim().length > 0 ? v : null;
-}
-
-function range(v: unknown): { low: number; high: number } | null {
-  const o = asObject(v);
-  if (!o) return null;
-  const low = num(o.low);
-  const high = num(o.high);
-  return low !== null && high !== null ? { low, high } : null;
-}
-
-function reuseFromRegistry(tool: RegistryTool): ReuseDetails {
-  return {
-    version: tool.version,
-    owner_team: tool.owner_team,
-    owner_contact: tool.owner_contact,
-    docs_url: tool.docs_url,
-    repo_path: tool.repo_path,
-    compliance_tags: tool.compliance_tags,
-    est_cost_per_call_usd: tool.est_cost_per_call_usd,
-    stack: tool.stack ?? null,
-    input_parameters: tool.input_parameters.map((p) => ({
-      name: p.name,
-      type: p.type,
-      required: p.required ?? false,
-    })),
-    example_call: tool.example_call,
-    example_response: tool.example_response,
-  };
-}
-
-function normalizeReuse(v: unknown): ReuseDetails | null {
-  const o = asObject(v);
-  if (!o) return null;
-  return {
-    version: str(o.version),
-    owner_team: str(o.owner_team),
-    owner_contact: str(o.owner_contact),
-    docs_url: str(o.docs_url),
-    repo_path: str(o.repo_path),
-    compliance_tags: Array.isArray(o.compliance_tags)
-      ? o.compliance_tags.map(String)
-      : [],
-    est_cost_per_call_usd: range(o.est_cost_per_call_usd),
-    stack: Array.isArray(o.stack) ? o.stack.map(String) : null,
-    input_parameters: Array.isArray(o.input_parameters)
-      ? o.input_parameters
-          .map((p) => asObject(p))
-          .filter((p): p is Record<string, unknown> => p !== null)
-          .map((p) => ({
-            name: String(p.name ?? ""),
-            type: String(p.type ?? ""),
-            required: Boolean(p.required),
-          }))
-      : [],
-    example_call: o.example_call ?? null,
-    example_response: o.example_response ?? null,
-  };
-}
-
-function normalizeModificationPlan(v: unknown): ModificationPlan | null {
-  const o = asObject(v);
-  if (!o) return null;
-  const whats_missing = str(o.whats_missing);
-  const change_needed = str(o.change_needed);
-  const modify_effort_days = num(o.modify_effort_days);
-  const build_new_effort_weeks = num(o.build_new_effort_weeks);
-  const est_savings_usd = num(o.est_savings_usd);
-  if (
-    !whats_missing ||
-    !change_needed ||
-    modify_effort_days === null ||
-    build_new_effort_weeks === null ||
-    est_savings_usd === null
-  )
-    return null;
-  return {
-    whats_missing,
-    change_needed,
-    modify_effort_days,
-    build_new_effort_weeks,
-    est_savings_usd,
-  };
-}
-
-function normalizeBuildPack(v: unknown): BuildPack | null {
-  const o = asObject(v);
-  if (!o) return null;
-  const build_effort_weeks = num(o.build_effort_weeks);
-  const est_monthly_run_cost_usd = range(o.est_monthly_run_cost_usd);
-  const suggested_owner_team = str(o.suggested_owner_team);
-  if (
-    build_effort_weeks === null ||
-    !est_monthly_run_cost_usd ||
-    !suggested_owner_team
-  )
-    return null;
-  return {
-    draft_mcp_spec: o.draft_mcp_spec ?? null,
-    build_effort_weeks,
-    est_monthly_run_cost_usd,
-    suggested_owner_team,
-    nearest_misses: Array.isArray(o.nearest_misses)
-      ? o.nearest_misses
-          .map((m) => asObject(m))
-          .filter((m): m is Record<string, unknown> => m !== null)
-          .map((m) => ({
-            tool: String(m.tool ?? ""),
-            reason: String(m.reason ?? ""),
-          }))
-          .slice(0, 3)
-      : [],
-  };
-}
-
-function buildRiskBlock(
-  tool: RegistryTool,
-  missing: string[],
-  deprecated: boolean,
-): RiskBlock {
-  if (missing.length > 0) {
-    return {
-      missing_clearance: `${missing.join(", ")}: required for the data this capability handles, absent on ${tool.name}`,
-      unblock_contact: "compliance-review@meridianbank.example",
-      est_unblock_time: "2 to 4 weeks for clearance review · modeled",
-    };
-  }
-  return {
-    missing_clearance: `${tool.name} is deprecated and scheduled for decommission`,
-    unblock_contact: tool.owner_contact ?? "compliance-review@meridianbank.example",
-    est_unblock_time: "plan migration before kickoff · modeled",
-  };
-}
-
 /**
- * Deterministic PII backstop. Scans a capability's own text (requirement +
- * justification) for hardcoded sensitive-data signals and, if any is found,
- * ADDS "pii-cleared" to its required_clearances. Code can only strengthen the
- * requirement — it never removes a clearance the LLM flagged. Fail-safe: if the
- * scan throws for any reason, "pii-cleared" is added anyway (over-flag, never
- * under-flag). Runs before applyComplianceRules, which then reads the
- * possibly-strengthened required_clearances unchanged.
+ * Parse and validate the single-call model response, then hand the functional
+ * capabilities to the shared deterministic core (finalizeAndScore) which owns
+ * the PII backstop, the compliance gate, and the readiness score.
  */
-function deterministicPiiScan(capability: Capability): Capability {
-  // Already required by the LLM — nothing to add.
-  if (capability.required_clearances.includes("pii-cleared")) {
-    return capability;
-  }
-
-  let touchesPii: boolean;
-  try {
-    const text = `${capability.requirement} ${capability.justification}`;
-    touchesPii = PII_SIGNAL_PATTERNS.some((re) => re.test(text));
-  } catch {
-    // Fail safe: on any scan error, over-flag rather than under-flag.
-    touchesPii = true;
-  }
-
-  if (!touchesPii) return capability;
-
-  return {
-    ...capability,
-    required_clearances: [...capability.required_clearances, "pii-cleared"],
-  };
-}
-
-/**
- * Deterministic risky decision. Code — not the LLM — owns risky/not-risky:
- * a matched tool is RISKY when a clearance the capability requires is absent
- * from the tool's registry compliance_tags, or when the tool is deprecated.
- * The LLM's justification still explains the concern, but never sets status.
- */
-function applyComplianceRules(
-  cap: Capability,
-  toolMap: Map<string, RegistryTool>,
-): Capability {
-  const tool = cap.matched_tool ? toolMap.get(cap.matched_tool) : undefined;
-  if (!tool) return cap; // unresolved or "missing" — no tags to read
-
-  const actual = new Set(tool.compliance_tags);
-  const required = cap.required_clearances.filter((c) =>
-    (KNOWN_CLEARANCES as readonly string[]).includes(c),
-  );
-  const missing = required.filter((c) => !actual.has(c));
-  const deprecated = tool.status === "deprecated";
-
-  if (missing.length > 0 || deprecated) {
-    return {
-      ...cap,
-      status: "risky",
-      risk_block: buildRiskBlock(tool, missing, deprecated),
-      // risky owns the detail block; clear any functional-status blocks.
-      modification_plan: null,
-      build_pack: null,
-    };
-  }
-  // No compliance gap → guarantee not-risky.
-  return { ...cap, risk_block: null };
-}
-
 function validate(
   raw: unknown,
   toolMap: Map<string, RegistryTool>,
@@ -456,27 +167,11 @@ function validate(
     });
   }
 
-  // Deterministic PII backstop strengthens required_clearances in code before
-  // the gate sees them; the gate logic itself is unchanged.
-  const guarded = capabilities.map(deterministicPiiScan);
-
-  // Deterministic risky decision happens here — not in the LLM.
-  const finalCapabilities = guarded.map((c) =>
-    applyComplianceRules(c, toolMap),
+  // Shared deterministic core: PII backstop + compliance gate + score.
+  const { capabilities: finalCapabilities, readiness_score } = finalizeAndScore(
+    capabilities,
+    toolMap,
   );
-
-  // Recompute the readiness score from the FINAL (code-decided) statuses so the
-  // score can't disagree with the rows the user sees.
-  const computedScore = finalCapabilities.length
-    ? Math.round(
-        (100 *
-          finalCapabilities.reduce(
-            (sum, c) => sum + STATUS_WEIGHTS[c.status],
-            0,
-          )) /
-          finalCapabilities.length,
-      )
-    : 0;
 
   const cost = range(r.est_monthly_cost_usd);
   const verdict = String(r.verdict ?? "").toUpperCase();
@@ -492,7 +187,7 @@ function validate(
 
   return {
     capabilities: finalCapabilities,
-    readiness_score: Math.max(0, Math.min(100, computedScore)),
+    readiness_score,
     est_monthly_cost_usd: cost,
     top_blocker: String(r.top_blocker ?? ""),
     verdict,
@@ -564,20 +259,12 @@ async function saveAnalysis(
   }
 }
 
-export type AnalyzeSuccess = {
-  ok: true;
-  result: AnalysisResult;
-  usage: { input_tokens: number; output_tokens: number };
-};
-export type AnalyzeFailure = { ok: false; error: string; httpStatus: number };
-export type AnalyzeOutcome = AnalyzeSuccess | AnalyzeFailure;
-
 /**
- * Core analysis pipeline. Loads the registry (Supabase with static fallback),
- * builds the prompt, calls the model, then runs the deterministic PII backstop
- * and compliance gate via validate(). Called by POST and directly by the eval
+ * Single-call analysis engine. Loads the registry (Supabase with static
+ * fallback), builds the prompt, calls the model once, then runs the shared
+ * deterministic core via validate(). Called by POST and directly by the eval
  * harness; the eval path skips the Supabase save so evals don't pollute the
- * memory dashboard. Behavior for POST callers is unchanged.
+ * memory dashboard. This is the "single" engine behind the ANALYZE_ENGINE flag.
  */
 export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
   if (!process.env.ANTHROPIC_API_KEY) {
