@@ -13,28 +13,40 @@ below.
 
 ## Latest baseline
 
-First real run against the 3 seeded PRDs. **These are the numbers every future
-upgrade will be measured against.** Full detail in
+Run against the 3 seeded PRDs, all 3 completing. **These are the numbers every
+future upgrade will be measured against.** Full detail in
 [`results/latest.json`](results/latest.json).
 
 | Metric | Value |
 |---|---|
-| **match_precision** | **63.6%** (7 / 11 correct tool picks) |
-| **match_recall** | **87.5%** (7 / 8 expected tools found) |
-| **compliance_gate_accuracy** | **37.5%** (6 / 16 status matches) |
-| **verdict_accuracy** | 50% (1 / 2 that completed) |
-| **score_in_range_accuracy** | 50% (1 / 2) |
+| **match_precision** | **50.0%** (11 / 22 correct tool picks) |
+| **match_recall** | **84.6%** (11 / 13 expected tools found) |
+| **compliance_gate_accuracy** | **68.8%** (11 / 16 status matches) |
+| **verdict_accuracy** | 66.7% (2 / 3) |
+| **score_in_range_accuracy** | 33.3% (1 / 3) |
 | **avg cost per PRD** | $0.10 |
-| **total run cost** | $0.20 |
-| **prds ok** | 2 / 3 (1 failed) |
-| avg input tokens | 22,260 |
-| avg output tokens | 2,376 |
+| **total run cost** | $0.31 |
+| **prds ok** | 3 / 3 (0 failed) |
+| avg input tokens | 22,261 |
+| avg output tokens | 2,428 |
+
+> **Reading the arc from the previous baseline:** the earlier baseline was
+> 2 / 3 (prd_003 failed at `max_tokens=4000`), scoring 63.6% precision on 11
+> tool picks. Now that the truncation is fixed and prd_003 passes, all 3 PRDs
+> contribute scored data — 22 tool picks instead of 11. The precision drop
+> (63.6% → 50.0%) and the gate/verdict rises reflect **prd_003 moving from
+> FAILING to PASSING** (more PRDs now scored, and the crypto PRD is a
+> label-disagreement-heavy case), **not an engine regression.** Comparing to
+> the prior baseline is apples-to-oranges precisely because the denominator
+> changed; this 3 / 3 run is the real starting line.
 
 ### How to interpret these numbers
 
-The headline **63.6% precision + 87.5% recall** show tool-matching is basically
-working: when the engine picks a tool, it's usually right, and it's finding
-almost every capability a labeler expects.
+The headline **50.0% precision + 84.6% recall** show tool-matching is working:
+recall is high (the engine finds almost every capability a labeler expects),
+while precision is dragged down mostly by prd_003, where the engine's tool
+picks for crypto capabilities diverge from labels that will themselves be
+revised in the review pass.
 
 **compliance_gate_accuracy at 37.5% is currently a label-quality signal, not
 an engine-quality signal.** Two things are driving it low:
@@ -44,21 +56,27 @@ an engine-quality signal.** Two things are driving it low:
 2. The engine legitimately decomposes some capabilities more finely than the
    labels do (see the "over-decomposition" note under known issues).
 
-Neither means the gate is broken. Once the labels are revised in a review
-pass, this number should rise sharply. Watch for regressions on
-`match_precision` and `match_recall` first; treat `compliance_gate_accuracy`
-as a dataset-hygiene metric until the label review lands.
+Neither means the gate is broken. As labels are revised in a review pass, this
+number should keep rising. Watch for regressions on `match_precision` and
+`match_recall` first; treat `compliance_gate_accuracy` as a dataset-hygiene
+metric until the label review lands.
 
 ---
 
 ## Known issues surfaced by baseline
 
-1. **Complex PRDs (7+ capabilities) risk JSON truncation at
-   `max_tokens=4000`.** `prd_003` (crypto custody + trading, 7 expected
-   capabilities) failed with "unexpected format" — the model's structured JSON
-   response was almost certainly cut off mid-object. Needs fix before scaling
-   to 50 PRDs; options are a higher `max_tokens` cap, streaming with
-   reconstruction, or splitting big PRDs.
+1. **[RESOLVED 2026-07-02] Complex PRDs (7+ capabilities) risk JSON truncation
+   at `max_tokens=4000`.** `prd_003` (crypto custody + trading) failed with
+   "unexpected format" — the model's structured JSON response was cut off
+   mid-object. Fixed by raising `max_tokens` to 8000 (comfortable headroom for
+   the ~6,750-token 15-capability worst case; Anthropic bills actual output
+   tokens, so it's free for normal calls), plus explicit `stop_reason ===
+   "max_tokens"` truncation detection returning a specific error, and
+   head/tail logging of the raw response on any parse failure. prd_003 now
+   completes at 3,500 output tokens (14 capabilities, ~56% headroom under the
+   new ceiling). Considered `jsonrepair` and rejected it: it can only fix
+   syntax, but a truncation loses real content, and silent partial success is
+   worse than clear failure.
 2. **Labels need tightening.** The engine's PII backstop is stricter than
    several initial labels (`rewards_points_engine` came back `risky` where
    labeled `partial`). Labels will be revised after a review pass; this

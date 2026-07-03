@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-07-02T00:17:29.158Z",
+  "timestamp": "2026-07-02T21:26:33.649Z",
   "dataset_version": 1,
   "dataset_prd_count": 3,
   "metrics": {
-    "match_precision": 0.6363636363636364,
-    "match_recall": 0.875,
-    "compliance_gate_accuracy": 0.375,
-    "verdict_accuracy": 0.5,
-    "score_in_range_accuracy": 0.5,
-    "avg_input_tokens": 22260,
-    "avg_output_tokens": 2376,
-    "avg_total_tokens": 24636,
-    "avg_cost_per_prd_usd": 0.1024,
-    "total_run_cost_usd": 0.2048,
+    "match_precision": 0.5,
+    "match_recall": 0.8461538461538461,
+    "compliance_gate_accuracy": 0.6875,
+    "verdict_accuracy": 0.6666666666666666,
+    "score_in_range_accuracy": 0.3333333333333333,
+    "avg_input_tokens": 22261,
+    "avg_output_tokens": 2428,
+    "avg_total_tokens": 24689,
+    "avg_cost_per_prd_usd": 0.1032,
+    "total_run_cost_usd": 0.3096,
     "prds_attempted": 3,
-    "prds_ok": 2,
-    "prds_failed": 1
+    "prds_ok": 3,
+    "prds_failed": 0
   },
   "per_prd": [
     {
@@ -25,7 +25,7 @@
       "actual_verdict": "NO-GO",
       "expected_verdict": "GO",
       "verdict_match": false,
-      "actual_score": 70,
+      "actual_score": 80,
       "expected_score_range": [
         85,
         100
@@ -39,25 +39,25 @@
       "expected_tool_total": 4,
       "tool_precision": 1,
       "tool_recall": 1,
-      "status_matches": 3,
+      "status_matches": 4,
       "status_total": 4,
-      "status_accuracy": 0.75,
+      "status_accuracy": 1,
       "usage": {
         "input_tokens": 22260,
-        "output_tokens": 1759
+        "output_tokens": 1476
       },
-      "cost_usd": 0.093165,
+      "cost_usd": 0.08892,
       "pair_details": [
         {
           "expected_capability": "Fetch all transactions for the statement month",
-          "actual_requirement": "Fetch all transactions for the statement month",
+          "actual_requirement": "Fetch all transactions for the month",
           "expected_tool": "transaction_history_api",
           "actual_tool": "transaction_history_api",
           "tool_match": true,
           "expected_status": "covered",
           "actual_status": "covered",
           "status_match": true,
-          "similarity": 1.5
+          "similarity": 1.3
         },
         {
           "expected_capability": "Get the account balance as of the statement date",
@@ -88,15 +88,15 @@
           "actual_tool": "statement_generator",
           "tool_match": true,
           "expected_status": "covered",
-          "actual_status": "partial",
-          "status_match": false,
+          "actual_status": "covered",
+          "status_match": true,
           "similarity": 1.1
         }
       ],
       "unmatched_expected": [],
       "unmatched_actual": [
         {
-          "requirement": "Make the generated statement available in the customer's document center",
+          "requirement": "Make statements available in the customer's document center",
           "status": "missing",
           "matched_tool": null
         }
@@ -109,7 +109,7 @@
       "actual_verdict": "NO-GO",
       "expected_verdict": "NO-GO",
       "verdict_match": true,
-      "actual_score": 49,
+      "actual_score": 55,
       "expected_score_range": [
         45,
         65
@@ -117,7 +117,7 @@
       "score_in_range": true,
       "paired_count": 5,
       "expected_count": 5,
-      "actual_capability_count": 9,
+      "actual_capability_count": 8,
       "tool_pick_correct": 3,
       "tool_pick_total": 7,
       "expected_tool_total": 4,
@@ -128,13 +128,13 @@
       "status_accuracy": 0.6,
       "usage": {
         "input_tokens": 22260,
-        "output_tokens": 2993
+        "output_tokens": 2308
       },
-      "cost_usd": 0.111675,
+      "cost_usd": 0.1014,
       "pair_details": [
         {
           "expected_capability": "Notify cardholders one week before quarter end to pick next quarter's category",
-          "actual_requirement": "Send notification to cardholders one week before quarter end to prompt next-quarter category selection",
+          "actual_requirement": "Send a notification to cardholders one week before quarter end to prompt selection of next quarter's category",
           "expected_tool": "notification_dispatcher",
           "actual_tool": "notification_dispatcher",
           "tool_match": true,
@@ -144,85 +144,215 @@
           "similarity": 1.071
         },
         {
-          "expected_capability": "Categorize each card transaction by merchant type",
-          "actual_requirement": "Classify and match transaction merchant type to eligible reward categories",
-          "expected_tool": "transaction_categorizer",
-          "actual_tool": "transaction_categorizer",
-          "tool_match": true,
-          "expected_status": "covered",
-          "actual_status": "covered",
-          "status_match": true,
-          "similarity": 0.773
-        },
-        {
           "expected_capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
-          "actual_requirement": "Cardholder selects one merchant category per quarter for 3x rewards",
+          "actual_requirement": "Calculate and award 3x reward points on eligible spend in the cardholder's chosen merchant category, and 1x on all other spend",
           "expected_tool": "rewards_points_engine",
           "actual_tool": "rewards_points_engine",
           "tool_match": true,
           "expected_status": "partial",
           "actual_status": "risky",
           "status_match": false,
-          "similarity": 0.563
+          "similarity": 0.813
+        },
+        {
+          "expected_capability": "Categorize each card transaction by merchant type",
+          "actual_requirement": "Classify each transaction to determine whether it falls in the cardholder's chosen merchant category",
+          "expected_tool": "transaction_categorizer",
+          "actual_tool": "transaction_categorizer",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 0.731
         },
         {
           "expected_capability": "Send cardholders a monthly points-by-category breakdown",
-          "actual_requirement": "Monthly breakdown of points earned by category displayed to cardholder",
+          "actual_requirement": "Display a monthly breakdown of points earned by category to the cardholder",
           "expected_tool": "statement_generator",
-          "actual_tool": null,
+          "actual_tool": "rewards_points_engine",
           "tool_match": false,
           "expected_status": "partial",
-          "actual_status": "missing",
+          "actual_status": "risky",
           "status_match": false,
           "similarity": 0.444
         },
         {
           "expected_capability": "Persist each customer's chosen category for the quarter",
-          "actual_requirement": "Persist and enforce the chosen category for the full calendar quarter (no mid-quarter changes)",
+          "actual_requirement": "Store and enforce the cardholder's chosen merchant category for the quarter (persists for the quarter, cannot be changed mid-quarter)",
           "expected_tool": null,
           "actual_tool": null,
           "tool_match": false,
           "expected_status": "missing",
           "actual_status": "missing",
           "status_match": true,
-          "similarity": 0.414
+          "similarity": 0.264
         }
       ],
       "unmatched_expected": [],
       "unmatched_actual": [
         {
-          "requirement": "Apply 3x points multiplier for spend in the elected category and 1x on all other spend",
-          "status": "risky",
-          "matched_tool": "transaction_categorizer"
+          "requirement": "Schedule the quarterly pre-end notification batch across ~150,000 cardholders",
+          "status": "covered",
+          "matched_tool": "batch_job_scheduler"
         },
         {
-          "requirement": "Retrieve cardholder profile and card account data to validate eligibility and link category election",
-          "status": "risky",
-          "matched_tool": "customer_profile_lookup"
-        },
-        {
-          "requirement": "Write immutable audit records for category elections and points decisions",
+          "requirement": "Write an auditable log entry for each category selection, points award decision, and notification sent",
           "status": "covered",
           "matched_tool": "audit_log_writer"
         },
         {
-          "requirement": "Schedule and trigger the quarter-end reminder batch notification job",
-          "status": "covered",
-          "matched_tool": "batch_job_scheduler"
+          "requirement": "Retrieve customer card and profile data needed to apply rewards logic and send notifications",
+          "status": "risky",
+          "matched_tool": "customer_profile_lookup"
         }
       ]
     },
     {
       "id": "prd_003",
       "title": "Retail Cryptocurrency Custody & Trading",
-      "ok": false,
-      "error": "The model returned an unexpected format. Run the analysis again.",
+      "ok": true,
+      "actual_verdict": "NO-GO",
       "expected_verdict": "NO-GO",
+      "verdict_match": true,
+      "actual_score": 70,
       "expected_score_range": [
         40,
         60
       ],
-      "expected_count": 7
+      "score_in_range": false,
+      "paired_count": 6,
+      "expected_count": 7,
+      "actual_capability_count": 14,
+      "tool_pick_correct": 4,
+      "tool_pick_total": 11,
+      "expected_tool_total": 5,
+      "tool_precision": 0.36363636363636365,
+      "tool_recall": 0.8,
+      "status_matches": 4,
+      "status_total": 7,
+      "status_accuracy": 0.5714285714285714,
+      "usage": {
+        "input_tokens": 22263,
+        "output_tokens": 3500
+      },
+      "cost_usd": 0.119289,
+      "pair_details": [
+        {
+          "expected_capability": "KYC-verify customer identity before enabling crypto access",
+          "actual_requirement": "KYC-verify customer identity before enabling crypto access",
+          "expected_tool": "kyc_verification_service",
+          "actual_tool": "kyc_verification_service",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 1.5
+        },
+        {
+          "expected_capability": "Generate quarterly regulatory reports covering crypto activity",
+          "actual_requirement": "Generate quarterly regulatory reports covering crypto activity",
+          "expected_tool": "regulatory_report_builder",
+          "actual_tool": "regulatory_report_builder",
+          "tool_match": true,
+          "expected_status": "partial",
+          "actual_status": "partial",
+          "status_match": true,
+          "similarity": 1.5
+        },
+        {
+          "expected_capability": "Post crypto transactions to the general ledger",
+          "actual_requirement": "Post all crypto transactions to the general ledger",
+          "expected_tool": "ledger_posting_service",
+          "actual_tool": "ledger_posting_service",
+          "tool_match": true,
+          "expected_status": "partial",
+          "actual_status": "covered",
+          "status_match": false,
+          "similarity": 1.333
+        },
+        {
+          "expected_capability": "Display real-time BTC and ETH prices in the app",
+          "actual_requirement": "Display real-time BTC and ETH prices in the mobile app",
+          "expected_tool": "market_data_feed",
+          "actual_tool": null,
+          "tool_match": false,
+          "expected_status": "partial",
+          "actual_status": "missing",
+          "status_match": false,
+          "similarity": 0.875
+        },
+        {
+          "expected_capability": "Screen customer against AML and sanctions lists",
+          "actual_requirement": "Screen customers against AML lists before enabling crypto access",
+          "expected_tool": "aml_screening_api",
+          "actual_tool": "aml_screening_api",
+          "tool_match": true,
+          "expected_status": "covered",
+          "actual_status": "covered",
+          "status_match": true,
+          "similarity": 0.864
+        },
+        {
+          "expected_capability": "Execute buy/sell trades of BTC and ETH against USD",
+          "actual_requirement": "Execute BTC/ETH to USD trades at prevailing market rates",
+          "expected_tool": null,
+          "actual_tool": null,
+          "tool_match": false,
+          "expected_status": "missing",
+          "actual_status": "missing",
+          "status_match": true,
+          "similarity": 0.505
+        }
+      ],
+      "unmatched_expected": [
+        {
+          "capability": "Custody customer Bitcoin and Ethereum wallets in cold storage",
+          "expected_status": "missing",
+          "expected_tool": null
+        }
+      ],
+      "unmatched_actual": [
+        {
+          "requirement": "Screen customers against sanctions lists before enabling crypto access",
+          "status": "covered",
+          "matched_tool": "sanctions_realtime_check"
+        },
+        {
+          "requirement": "Manage customer crypto deposit and withdrawal flows (crypto wallet interactions)",
+          "status": "missing",
+          "matched_tool": null
+        },
+        {
+          "requirement": "Write immutable audit log entries for all regulated crypto actions",
+          "status": "covered",
+          "matched_tool": "audit_log_writer"
+        },
+        {
+          "requirement": "Fetch and display customer profile and KYC status to gate crypto access",
+          "status": "risky",
+          "matched_tool": "customer_profile_lookup"
+        },
+        {
+          "requirement": "Monitor crypto transactions for suspicious patterns (AML transaction monitoring)",
+          "status": "covered",
+          "matched_tool": "transaction_monitoring_engine"
+        },
+        {
+          "requirement": "Send customer notifications for crypto deposits, withdrawals, and trade confirmations",
+          "status": "covered",
+          "matched_tool": "notification_dispatcher"
+        },
+        {
+          "requirement": "Evaluate product eligibility before allowing a customer to access the crypto product",
+          "status": "covered",
+          "matched_tool": "eligibility_rules_api"
+        },
+        {
+          "requirement": "Record and check customer consent for crypto data usage (GDPR/CCPA)",
+          "status": "covered",
+          "matched_tool": "customer_consent_manager"
+        }
+      ]
     }
   ]
 }

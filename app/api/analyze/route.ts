@@ -612,12 +612,19 @@ export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
 
   const client = new Anthropic();
 
+  // 8000 gives comfortable headroom for a 15-capability worst-case PRD
+  // (~6,750 tokens by measured status-class averages). Anthropic bills actual
+  // output tokens, not the ceiling, so this is essentially free for normal
+  // calls. See eval baseline notes for the math.
+  const MAX_OUTPUT_TOKENS = 8000;
+
   let text: string;
   let usage: { input_tokens: number; output_tokens: number };
+  let stopReason: string | null = null;
   try {
     const response = await client.messages.create({
       model: "claude-sonnet-4-6",
-      max_tokens: 4000,
+      max_tokens: MAX_OUTPUT_TOKENS,
       stream: false,
       system: systemPrompt,
       messages: [{ role: "user", content: `PRD to analyze:\n\n${prd}` }],
@@ -630,6 +637,7 @@ export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
       input_tokens: response.usage.input_tokens,
       output_tokens: response.usage.output_tokens,
     };
+    stopReason = response.stop_reason;
   } catch (error) {
     if (error instanceof Anthropic.AuthenticationError) {
       return { ok: false, error: "The demo's API key is invalid. Check ANTHROPIC_API_KEY.", httpStatus: 500 };
@@ -643,10 +651,31 @@ export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
     throw error;
   }
 
+  // Detect truncation explicitly — distinct from malformed JSON — so the demo
+  // can show a specific error and the eval harness can flag it separately.
+  if (stopReason === "max_tokens") {
+    console.error(
+      `[analyze] response truncated at max_tokens=${MAX_OUTPUT_TOKENS}; output=${usage.output_tokens} tokens`,
+    );
+    console.error(`[analyze] truncated tail: ...${text.slice(-400)}`);
+    return {
+      ok: false,
+      error:
+        "The analysis response was too long and got cut off. Try a simpler or shorter PRD.",
+      httpStatus: 502,
+    };
+  }
+
   let result: AnalysisResult | null = null;
   try {
     result = validate(JSON.parse(extractJson(text)), toolMap);
-  } catch {
+  } catch (e) {
+    console.error(
+      "[analyze] JSON parse or validation failed:",
+      e instanceof Error ? e.message : e,
+    );
+    console.error(`[analyze] response head: ${text.slice(0, 300)}`);
+    console.error(`[analyze] response tail: ${text.slice(-300)}`);
     result = null;
   }
 
