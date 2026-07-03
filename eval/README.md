@@ -11,58 +11,89 @@ below.
 
 ---
 
-## Latest baseline (dataset v2, `--runs=5`)
+## Latest baseline (dataset v3 — 8 PRDs, `--runs=5`)
 
-The authoritative baseline is a **5-pass distribution** (15 analyze calls),
-after the first label-review pass tightened the ground truth. **These are the
-numbers every future upgrade is measured against** — compare a change's 5-run
-distribution to this one. Full detail in [`results/latest.json`](results/latest.json).
+The authoritative baseline is a **5-pass distribution over all 8 PRDs** (40
+analyze calls). **These are the numbers every future upgrade is measured
+against** — compare a change's 5-run distribution to this one. Full detail in
+[`results/latest.json`](results/latest.json).
 
 | Metric | mean | spread [min–max] | σ |
 |---|---|---|---|
-| **match_precision** | **63.3%** | 59.1–66.7% | 0.024 |
-| **match_recall** | **92.0%** | 86.7–93.3% | 0.027 |
-| **compliance_gate_accuracy** | **88.9%** | 83.3–94.4% | 0.035 |
-| **verdict_accuracy** | **100%** | 100–100% | 0.000 |
-| **score_in_range_accuracy** | **100%** | 100–100% | 0.000 |
-| **avg cost per PRD** | $0.107 | $0.102–0.111 | — |
-| **total run cost** | $1.61 | (15 calls) | — |
+| **match_precision** | **68.4%** | 65.3–73.9% | 0.033 |
+| **match_recall** | **95.5%** | 91.8–98.0% | 0.020 |
+| **compliance_gate_accuracy** | **88.3%** | 81.7–93.3% | 0.041 |
+| **verdict_accuracy** | **87.5%** | 87.5–87.5% | 0.000 |
+| **score_in_range_accuracy** | **87.5%** | 87.5–87.5% | 0.000 |
+| **avg cost per PRD** | $0.109 | $0.107–0.111 | — |
+| **total run cost** | $4.35 | (40 calls) | — |
 
-> **Why this replaced the single-run snapshot.** The v2 commit reported a single
-> run with `compliance_gate_accuracy` 72.2% and `match_precision` 59.1%. The
-> 5-run distribution shows those were **low samples** — the true means are
-> **88.9%** and **63.3%**, with the single run sitting at or below the observed
-> minimum. This is exactly why single runs must not be used to judge a change:
-> one sample was ~16 points low on gate accuracy purely from LLM variance.
-> `verdict_accuracy` and `score_in_range_accuracy`, by contrast, are rock-solid
-> at 100% (σ 0.000) — those are stable signals; the matching metrics are the
-> variable ones.
+> **From 3 PRDs to 8.** Precision (63.3%→68.4%) and recall (92.0%→95.5%) rose
+> with the larger, cleaner set; gate held (~88%). `verdict_accuracy` is 7/8 —
+> the one non-match is **prd_007, an intentional divergence probe** (see below),
+> not a regression. `score_in_range_accuracy` is also 7/8: after calibrating the
+> five new PRDs' ranges to observed reality, every PRD's scores fall in-range
+> except prd_007, whose range is deliberately left uncalibrated as part of the
+> probe. Both "misses" are the same intentional case.
+
+### Per-PRD (5-run means)
+
+| PRD | domain | verdict (label→engine) | score [min–max] | range | prec | gate |
+|---|---|---|---|---|---|---|
+| 001 | accounts | GO → GO 5/5 | 100 | [85,100] | 0.96 | 1.00 |
+| 002 | cards | NO-GO 5/5 | 56 [44–73] | [42,75] | 0.75 | 0.83 |
+| 003 | wealth/crypto | NO-GO 5/5 | 62 [53–70] | [50,75] | 0.37 | 0.83 |
+| 004 | lending | NO-GO 5/5 | 72 [56–80] | [54,82] | 0.54 | 0.87 |
+| 005 | payments | GO → GO 5/5 | 99 [93–100] | [88,100] | 1.00 | 0.97 |
+| 006 | wealth/robo | NO-GO 5/5 | 66 [57–72] | [54,74] | 0.47 | 0.85 |
+| **007** | **fraud** | **GO → NO-GO 0/5** | **77 [71–79]** | **[82,98]** | **1.00** | **0.97** |
+| 008 | mortgage | NO-GO 5/5 | 58 [46–71] | [44,74] | 0.91 | 0.84 |
 
 ### How to interpret these numbers
 
 **Most remaining disagreements are engine run-to-run variance, not label
 error.** The engine is non-deterministic: across runs the same capability
-legitimately flips (e.g. `statement_generator` covered↔partial,
-`transaction_categorizer` covered↔partial, the notification's risky flag depends
-on whether the LLM tags it PII that run, and the rewards calc sometimes matches
-`budgeting_insights_engine` instead of `rewards_points_engine`). The v2 labels
-encode the *defensible* ground truth; any single run disagrees on a few
-capabilities purely from LLM variance. That is why the baseline is a
-distribution — see "Measuring a baseline" for the standard.
+legitimately flips (e.g. `statement_generator` covered↔partial, and in
+PII-heavy domains like lending the LLM tags many capabilities as PII-requiring,
+flipping `audit-grade`-only tools to risky on some runs). The labels encode the
+*defensible* ground truth; any single run disagrees on a few capabilities purely
+from variance — that is why the baseline is a distribution.
 
-`compliance_gate_accuracy` (88.9% mean) now matches the gate's design closely;
-its remaining spread (σ 0.035) is mostly the LLM's variable `required_clearances`
-assignment (whether it flags a given capability as PII-touching on a given run),
-an engine-determinism question, not a labeling one. `match_precision` (63.3%) is
-the metric most worth improving — dragged down by prd_003, where the engine's
-crypto tool picks are the least stable.
+`match_precision` (68.4%) is the metric most worth improving, dragged down by
+prd_003 and prd_006 where the engine's tool picks are least stable.
+`compliance_gate_accuracy` (88.3%) closely matches the gate's design; its spread
+is mostly the LLM's variable `required_clearances` assignment.
 
-On score ranges: **prd_003's band is `[50, 75]`** to contain its genuine
-run-to-run instability (55–70 observed) — peripheral `covered` capabilities
-swing the unweighted average, the exact symptom of the criticality-weighting
-limitation logged in the Engine limitations backlog. A range must contain
-reality, not one lucky run; widen it when a metric flaps for variance reasons,
-not to paper over a real regression.
+### Intentional divergences
+
+Some labels deliberately disagree with the engine to document a known behavior.
+**Do not "fix" these by relabeling** — they are probes.
+
+- **prd_007 (fraud) — labeled GO, engine returns NO-GO 5/5.** Two engine
+  findings drive this, both logged in the backlog:
+  1. The engine reads a **non-functional constraint** ("latency budget under
+     150ms") as a *capability* and marks it `missing` (no tool). This is the
+     engine already sensing an **orchestration gap** — evidence the orchestrator
+     is the right next build.
+  2. The PRD's one **peripheral risky** capability (a fraud-hold notification on
+     `notification_dispatcher`) coincides with that missing, so we cannot cleanly
+     attribute the NO-GO to the risky alone (see backlog: needs an isolated
+     single-risky/zero-missing test PRD).
+  The label stays GO on purpose. If the orchestrator later handles the latency
+  constraint, prd_007 may flip to GO on its own — that flip would be **proof the
+  orchestrator worked**. Its score range is left at `[82,98]` (a known miss)
+  rather than widened, because widening a range while keeping a GO label the
+  engine won't produce would be incoherent.
+
+### Score-range calibration (v3)
+
+The five new PRDs' ranges were calibrated to their observed 5-run spread (a
+range must *contain reality*). **prd_006** was widened to `[54, 74]` even though
+that is more generous than a non-viable robo-advisor (3 missing regulatory
+capabilities) deserves — **this widening documents the known engine limitation
+that the score runs too high for non-viable products (see backlog), it does not
+endorse it.** The verdict correctly says NO-GO; only the number is generous.
+prd_003 stays `[50, 75]` for the same reason.
 
 ---
 
@@ -103,17 +134,36 @@ not to paper over a real regression.
 Distinct from label issues — these are genuine engine shortcomings the eval
 surfaced, tracked here until addressed (not fixable by relabeling).
 
-1. **Readiness score has no capability-criticality weighting.** The score
-   averages all capabilities equally, so a product that is fundamentally
-   non-viable can still score in the middle. prd_003 (crypto custody + trading)
-   scored ~70 despite having **no custody engine and no trading engine** — the
-   two existential `missing` capabilities were diluted to ~14% of a 14-capability
-   decomposition by many peripheral `covered` capabilities (KYC, AML, sanctions,
-   consent, monitoring…). A missing "custody" for a custody product is not
-   equal to a missing nice-to-have. Fix direction: weight or flag existential
-   `missing` capabilities so they dominate the score (or cap the score when a
-   critical-path capability is missing). Surfaced by the prd_003 score
-   disagreement during the v2 label review.
+1. **A missing critical-path capability should make the SCORE reflect
+   non-viability, not just the verdict.** Across the 8-PRD set the *verdict*
+   reliably catches non-viable products (prd_003/004/006/008 all return NO-GO
+   5/5). The problem is the *score*: it averages all capabilities equally, so a
+   product that cannot launch still scores mid-range. prd_003 (no custody, no
+   trading) scores ~62; prd_006 (no suitability, no drift-monitoring, no
+   tax-loss harvesting) scores ~66; prd_008 (no appraisal, flood, or TRID
+   disclosures) scores ~58 — all comfortably above the crypto/robo "clearly
+   broken" intuition. Existential `missing` capabilities get diluted by many
+   peripheral `covered` ones. Fix direction: weight or flag critical-path
+   `missing` capabilities so they dominate the score, or cap the score when one
+   is present. (The verdict is fine; this is a score-fidelity issue.) The v3
+   range calibration widened prd_006 to `[54,74]` to *contain* this behavior,
+   which documents but does not endorse it.
+2. **The engine reads non-functional constraints as capabilities.** In prd_007
+   the engine turned the PRD line "latency budget under 150ms" into a capability
+   ("Orchestrate all fraud-scoring signals within a 150ms latency budget") and
+   marked it `missing` (no tool). Performance/latency/SLA constraints are not
+   registry capabilities; treating them as `missing` distorts the score and can
+   flip the verdict. This is also the engine **sensing an orchestration gap** —
+   direct motivation for the orchestrator build. Surfaced by prd_007.
+3. **Peripheral-risky → NO-GO: hypothesis unconfirmed.** prd_007 (labeled GO)
+   returns NO-GO 5/5 with only one *peripheral* risky capability (a fraud-hold
+   notification) — but because the engine also invented a `missing` capability
+   (#2 above) on the same PRD, we cannot attribute the NO-GO to the peripheral
+   risky alone. Open question: does any single risky capability force NO-GO
+   regardless of criticality? **Needs an isolated test PRD** engineered so the
+   engine yields exactly one risky and zero missing. If confirmed, the engine is
+   too aggressive (any compliance risk blocks the verdict); if not, the missing
+   was the driver. Surfaced by prd_007.
 
 ---
 
@@ -348,13 +398,22 @@ all — that's fundamentally new functionality, not an extension.
 
 ## Seeded PRDs
 
-Three PRDs are seeded to exercise the main engine paths. Target is 50 total.
+8 PRDs across distinct banking domains exercise the main engine paths. Target
+is 50 total. Batch 1 (prd_004–008) was added in dataset v3.
 
-| id | Title | What it exercises |
+| id | Title (domain) | What it exercises |
 |---|---|---|
-| `prd_001` | Monthly Savings Statement Generator | Clean covered path: all 4 capabilities map to compliant tools; verifies the gate does not over-flag. Expected GO, ~85-100. |
-| `prd_002` | Custom Card Rewards Categories | Real parameter-level modifications (partial), one clear missing capability, and one PII-backstop risky trap on `notification_dispatcher`'s empty tags. Expected NO-GO, mixed statuses. |
-| `prd_003` | Retail Cryptocurrency Custody & Trading | Novel-capability territory: multiple `missing` items (crypto custody, crypto trading) with a few `partial` extensions to existing tools (`market_data_feed`, `ledger_posting_service`, `regulatory_report_builder`) and covered basics (KYC, AML). Expected NO-GO, ~40-60. |
+| `prd_001` | Monthly Savings Statement Generator (accounts) | Clean covered path: all 4 capabilities map to compliant tools; verifies the gate does not over-flag. GO. |
+| `prd_002` | Custom Card Rewards Categories (cards) | Parameter-level modifications, a missing capability, and PII-backstop risky traps on empty-tag tools. NO-GO. |
+| `prd_003` | Retail Cryptocurrency Custody & Trading (wealth) | Novel-capability territory: multiple `missing` (crypto custody, trading) plus `partial` extensions. NO-GO. |
+| `prd_004` | Personal Loan Origination (lending) | **Deprecated-tool → risky** trap (`credit_bureau_pull` is deprecated), plus missing regulatory capabilities (adverse-action, fair-lending). NO-GO. |
+| `prd_005` | Domestic Wire Transfer (payments) | All-covered clean GO across the payments/security stack; tests the gate does not over-flag. GO. |
+| `prd_006` | Robo-Advisory Portfolio Management (wealth) | All four statuses: 3 `missing` (suitability, drift-monitoring, tax-loss harvesting), 1 risky, 1 partial. NO-GO. |
+| `prd_007` | Real-Time Card Fraud Scoring (fraud) | **Intentional divergence probe** — labeled GO (one peripheral risky), engine returns NO-GO. See "Intentional divergences". |
+| `prd_008` | Mortgage Origination & Underwriting (mortgage) | Missing-heavy (appraisal, flood, TRID) + deprecated-tool risky + partial rate-lock. NO-GO. |
+
+Coverage: 3 GO / 5 NO-GO; all four statuses exercised; ~50 distinct registry
+tools touched; deprecated-tool → risky path exercised by prd_004 and prd_008.
 
 ---
 

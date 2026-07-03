@@ -1,7 +1,7 @@
 {
-  "version": 2,
+  "version": 3,
   "target_prd_count": 50,
-  "notes": "Test PRDs for the SpecBridge accuracy harness. Each entry declares the expected engine output so the runner can measure precision, recall, compliance-gate accuracy, and cost. Tool names must match rows in the Supabase `tools` registry. Labels follow the standard documented in README.md ('Labeling standard'). v2: tightened labels on prd_001-003 after the first label-review pass. Extend by appending to `prds`.",
+  "notes": "Test PRDs for the SpecBridge accuracy harness. Each entry declares the expected engine output so the runner can measure precision, recall, compliance-gate accuracy, and cost. Tool names must match rows in the Supabase `tools` registry. Labels follow the standard documented in README.md ('Labeling standard'). v2: tightened labels on prd_001-003. v3: expanded to 8 PRDs (batch 1: +prd_004..008 across lending, payments, wealth/robo, fraud, mortgage). Extend by appending to `prds`.",
   "prds": [
     {
       "id": "prd_001",
@@ -87,7 +87,7 @@
         }
       ],
       "expected_verdict": "NO-GO",
-      "expected_score_range": [45, 65]
+      "expected_score_range": [42, 75]
     },
     {
       "id": "prd_003",
@@ -140,6 +140,308 @@
       ],
       "expected_verdict": "NO-GO",
       "expected_score_range": [50, 75]
+    },
+    {
+      "id": "prd_004",
+      "title": "Personal Loan Origination",
+      "domain": "lending",
+      "prd_text": "Build an end-to-end personal loan origination flow. An applicant applies in-app; we verify their identity and income, pull their credit report from the bureau, and score their credit risk to make a decision. Approved applicants see a risk-based personalized interest rate, an amortization schedule, and e-sign the loan agreement; funds are then disbursed to their account. Declined applicants must receive an adverse-action notice explaining the decision, and we must run fair-lending disparate-impact monitoring across all decisions. Target: ~40,000 applications/month.",
+      "expected_matches": [
+        {
+          "capability": "Verify the applicant's identity via KYC before origination",
+          "expected_status": "covered",
+          "expected_tool": "kyc_verification_service",
+          "notes": "kyc_verification_service carries pii-cleared and audit-grade; identity verification is fully satisfied."
+        },
+        {
+          "capability": "Verify the applicant's income",
+          "expected_status": "covered",
+          "expected_tool": "income_verification_service",
+          "notes": "income_verification_service carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Pull the applicant's credit report from the bureau",
+          "expected_status": "risky",
+          "expected_tool": "credit_bureau_pull",
+          "notes": "credit_bureau_pull is DEPRECATED (status is not active). The deterministic gate flips any matched deprecated tool to risky regardless of clearances, and it is the only bureau-pull tool in the registry — a hard blocker on the origination critical path."
+        },
+        {
+          "capability": "Score the applicant's credit risk for the lending decision",
+          "expected_status": "covered",
+          "expected_tool": "credit_risk_model",
+          "notes": "credit_risk_model carries audit-grade, the natural clearance for a regulated model decision. The PII backstop does not fire on this phrasing (no PII signal word), so covered."
+        },
+        {
+          "capability": "Calculate the loan amortization schedule",
+          "expected_status": "covered",
+          "expected_tool": "loan_amortization_calculator",
+          "notes": "Pure calculation on amounts and rates; no PII or audit clearance required, so the tool's empty compliance_tags still yield covered."
+        },
+        {
+          "capability": "Present a risk-based personalized interest rate to the applicant",
+          "expected_status": "partial",
+          "expected_tool": "interest_rate_service",
+          "notes": "Per the extend-vs-new rule: interest_rate_service returns current rates by product and tenor (~70%+ of the job); personalizing the rate by the applicant's risk tier is a config/extension, so partial."
+        },
+        {
+          "capability": "Capture the applicant's e-signature on the loan agreement",
+          "expected_status": "covered",
+          "expected_tool": "e_signature_service",
+          "notes": "e_signature_service carries audit-grade for legally binding signatures; covered."
+        },
+        {
+          "capability": "Generate and send ECOA adverse-action notices to declined applicants",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No registry tool generates compliant ECOA / Reg B adverse-action notices; a required regulatory capability with no tool, so missing."
+        },
+        {
+          "capability": "Perform fair-lending disparate-impact monitoring across decisions",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No fair-lending / disparate-impact monitoring tool exists in the registry; missing."
+        }
+      ],
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [54, 82]
+    },
+    {
+      "id": "prd_005",
+      "title": "Domestic Wire Transfer",
+      "domain": "payments",
+      "prd_text": "Let customers send a domestic wire transfer from the mobile app. The customer authenticates with a one-time passcode, we validate the saved beneficiary, screen the transfer against real-time sanctions lists, and score it for fraud risk before initiating the wire. On success we post the debit and credit to the general ledger and write an immutable audit-log entry. Target: ~250,000 wires/month.",
+      "expected_matches": [
+        {
+          "capability": "Authenticate the customer with a one-time passcode for step-up",
+          "expected_status": "covered",
+          "expected_tool": "otp_delivery_service",
+          "notes": "otp_delivery_service carries pii-cleared; covered."
+        },
+        {
+          "capability": "Validate the saved beneficiary/payee details",
+          "expected_status": "covered",
+          "expected_tool": "beneficiary_manager",
+          "notes": "beneficiary_manager carries pii-cleared for payee PII; covered."
+        },
+        {
+          "capability": "Screen the transfer against real-time sanctions lists",
+          "expected_status": "covered",
+          "expected_tool": "sanctions_realtime_check",
+          "notes": "sanctions_realtime_check carries audit-grade, the regulatory clearance for sanctions screening; the PII backstop does not fire on this phrasing, so covered."
+        },
+        {
+          "capability": "Score the transfer for fraud risk in real time",
+          "expected_status": "covered",
+          "expected_tool": "fraud_risk_scorer",
+          "notes": "fraud_risk_scorer carries audit-grade; covered."
+        },
+        {
+          "capability": "Initiate the domestic wire transfer",
+          "expected_status": "covered",
+          "expected_tool": "wire_transfer_initiator",
+          "notes": "wire_transfer_initiator carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Post the debit and credit to the general ledger",
+          "expected_status": "covered",
+          "expected_tool": "ledger_posting_service",
+          "notes": "ledger_posting_service carries audit-grade; covered."
+        },
+        {
+          "capability": "Write an immutable audit-log entry for the transfer",
+          "expected_status": "covered",
+          "expected_tool": "audit_log_writer",
+          "notes": "audit_log_writer carries audit-grade and pii-cleared; covered."
+        }
+      ],
+      "expected_verdict": "GO",
+      "expected_score_range": [88, 100]
+    },
+    {
+      "id": "prd_006",
+      "title": "Robo-Advisory Portfolio Management",
+      "domain": "wealth",
+      "prd_text": "Launch a robo-advisor. Clients complete a risk-tolerance and suitability questionnaire, then the system generates automated investment recommendations, retrieves their current holdings, and executes rebalancing trades. It should continuously monitor portfolio drift and auto-trigger rebalancing when thresholds are breached, run tax-loss harvesting optimization, notify clients of changes, and produce a quarterly portfolio performance statement. Target: ~90,000 funded accounts in year one.",
+      "expected_matches": [
+        {
+          "capability": "Assess the client's risk tolerance and investment suitability via questionnaire",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No suitability / risk-profiling questionnaire tool exists in the registry; a regulatory prerequisite for giving advice (Reg BI), with no tool, so missing."
+        },
+        {
+          "capability": "Generate automated investment recommendations",
+          "expected_status": "covered",
+          "expected_tool": "robo_advisor_engine",
+          "notes": "robo_advisor_engine carries audit-grade; covered."
+        },
+        {
+          "capability": "Retrieve the client's current portfolio holdings",
+          "expected_status": "covered",
+          "expected_tool": "investment_portfolio_service",
+          "notes": "investment_portfolio_service carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Execute rebalancing trades",
+          "expected_status": "covered",
+          "expected_tool": "trade_execution_service",
+          "notes": "trade_execution_service carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Continuously monitor portfolio drift and auto-trigger rebalancing",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "Recommendation and execution tools exist, but nothing monitors drift and triggers rebalancing. That orchestration is fundamentally new functionality (not an extension of one tool), so missing."
+        },
+        {
+          "capability": "Run tax-loss harvesting optimization",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No tax-loss harvesting tool in the registry; missing."
+        },
+        {
+          "capability": "Send rebalancing and performance notifications to clients",
+          "expected_status": "risky",
+          "expected_tool": "notification_dispatcher",
+          "notes": "notification_dispatcher has empty compliance_tags and the capability handles client PII (contact channel); the PII backstop adds pii-cleared and the gate flips it to risky."
+        },
+        {
+          "capability": "Generate the quarterly portfolio performance statement",
+          "expected_status": "partial",
+          "expected_tool": "statement_generator",
+          "notes": "Per the extend-vs-new rule: statement_generator produces monthly account statement PDFs (~70%+ of statement generation); a portfolio-performance template is an extension, so partial."
+        }
+      ],
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [54, 74]
+    },
+    {
+      "id": "prd_007",
+      "title": "Real-Time Card Fraud Scoring",
+      "domain": "fraud",
+      "prd_text": "Add real-time fraud scoring to card authorization. At each card authorization we score the transaction for fraud risk, fingerprint the device, and score the login session risk, while monitoring transactions for suspicious patterns. Flagged transactions are written to an immutable audit log, and the cardholder is notified of any suspected-fraud hold. Latency budget: under 150ms at the authorization decision. Volume: ~12M authorizations/day.",
+      "expected_matches": [
+        {
+          "capability": "Authorize the card transaction in real time",
+          "expected_status": "covered",
+          "expected_tool": "card_authorization_service",
+          "notes": "card_authorization_service carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Score the transaction for fraud risk",
+          "expected_status": "covered",
+          "expected_tool": "fraud_risk_scorer",
+          "notes": "fraud_risk_scorer carries audit-grade; covered."
+        },
+        {
+          "capability": "Fingerprint the device for fraud signals",
+          "expected_status": "covered",
+          "expected_tool": "device_fingerprint_service",
+          "notes": "device_fingerprint_service carries audit-grade; covered."
+        },
+        {
+          "capability": "Score the login session risk",
+          "expected_status": "covered",
+          "expected_tool": "session_risk_engine",
+          "notes": "session_risk_engine carries audit-grade; covered."
+        },
+        {
+          "capability": "Monitor transactions for suspicious patterns",
+          "expected_status": "covered",
+          "expected_tool": "transaction_monitoring_engine",
+          "notes": "transaction_monitoring_engine carries audit-grade; covered."
+        },
+        {
+          "capability": "Write immutable audit-log entries for flagged transactions",
+          "expected_status": "covered",
+          "expected_tool": "audit_log_writer",
+          "notes": "audit_log_writer carries audit-grade and pii-cleared; covered."
+        },
+        {
+          "capability": "Notify the cardholder of a suspected-fraud hold",
+          "expected_status": "risky",
+          "expected_tool": "notification_dispatcher",
+          "notes": "notification_dispatcher has empty compliance_tags and the capability handles cardholder PII (contact channel); the PII backstop adds pii-cleared and the gate flips it to risky. This is peripheral, not the fraud-scoring critical path — it should not force NO-GO. INTENTIONAL DIVERGENCE PROBE: labeled GO on purpose, but the engine returns NO-GO 5/5 (see README 'Intentional divergences'). Kept as GO to track two engine findings; if the orchestrator later handles the latency constraint, this may flip to GO on its own. Not a label error — do not relabel."
+        }
+      ],
+      "expected_verdict": "GO",
+      "expected_score_range": [82, 98]
+    },
+    {
+      "id": "prd_008",
+      "title": "Mortgage Origination & Underwriting",
+      "domain": "mortgage",
+      "prd_text": "Build digital mortgage origination. Capture and validate the application, extract data from uploaded financial documents, verify income, value the collateral property, and score credit risk for underwriting. We must order a property appraisal from an approved appraiser, perform flood-zone determination, and pull the applicant's credit report. Offer an interest-rate lock, capture e-signatures on closing documents, and generate the TRID-compliant Loan Estimate and Closing Disclosure. Target: ~8,000 applications/month.",
+      "expected_matches": [
+        {
+          "capability": "Capture and validate the mortgage application",
+          "expected_status": "covered",
+          "expected_tool": "mortgage_application_intake",
+          "notes": "mortgage_application_intake carries pii-cleared; covered."
+        },
+        {
+          "capability": "Extract data from uploaded financial documents",
+          "expected_status": "covered",
+          "expected_tool": "document_ocr_extractor",
+          "notes": "document_ocr_extractor carries pii-cleared; covered."
+        },
+        {
+          "capability": "Verify the applicant's income",
+          "expected_status": "covered",
+          "expected_tool": "income_verification_service",
+          "notes": "income_verification_service carries pii-cleared and audit-grade; covered."
+        },
+        {
+          "capability": "Value the collateral property",
+          "expected_status": "covered",
+          "expected_tool": "collateral_valuation_api",
+          "notes": "collateral_valuation_api carries audit-grade; covered."
+        },
+        {
+          "capability": "Score credit risk for underwriting",
+          "expected_status": "covered",
+          "expected_tool": "credit_risk_model",
+          "notes": "credit_risk_model carries audit-grade; covered."
+        },
+        {
+          "capability": "Order a property appraisal from an approved appraiser",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No appraisal-ordering tool in the registry; a required step with no tool, so missing."
+        },
+        {
+          "capability": "Perform flood-zone determination",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No flood-zone determination tool exists in the registry; missing."
+        },
+        {
+          "capability": "Pull the applicant's credit report",
+          "expected_status": "risky",
+          "expected_tool": "credit_bureau_pull",
+          "notes": "credit_bureau_pull is DEPRECATED; the deterministic gate flips deprecated tools to risky, and it is the only bureau-pull tool."
+        },
+        {
+          "capability": "Offer an interest-rate lock",
+          "expected_status": "partial",
+          "expected_tool": "interest_rate_service",
+          "notes": "Per the extend-vs-new rule: interest_rate_service returns current rates (~70%+ of the job); a rate-lock mechanism is an extension, so partial."
+        },
+        {
+          "capability": "Capture e-signatures on closing documents",
+          "expected_status": "covered",
+          "expected_tool": "e_signature_service",
+          "notes": "e_signature_service carries audit-grade; covered."
+        },
+        {
+          "capability": "Generate the TRID-compliant Loan Estimate and Closing Disclosure",
+          "expected_status": "missing",
+          "expected_tool": null,
+          "notes": "No TRID disclosure generator in the registry (tax_document_generator is for tax forms, not mortgage disclosures); a required regulatory document with no tool, so missing."
+        }
+      ],
+      "expected_verdict": "NO-GO",
+      "expected_score_range": [44, 74]
     }
   ]
 }

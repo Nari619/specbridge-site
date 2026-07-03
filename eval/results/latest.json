@@ -1,187 +1,187 @@
 {
-  "timestamp": "2026-07-03T03:40:19.675Z",
-  "dataset_version": 2,
-  "dataset_prd_count": 3,
+  "timestamp": "2026-07-03T09:43:01.884Z",
+  "dataset_version": 3,
+  "dataset_prd_count": 8,
   "runs": 5,
   "metrics": {
     "match_precision": {
-      "mean": 0.6333,
-      "min": 0.5909,
-      "max": 0.6667,
-      "stdev": 0.0242,
+      "mean": 0.6837,
+      "min": 0.6528,
+      "max": 0.7385,
+      "stdev": 0.0325,
       "n": 5,
       "samples": [
-        0.5909,
-        0.6364,
-        0.6364,
-        0.6364,
-        0.6667
+        0.662,
+        0.7385,
+        0.7031,
+        0.6528,
+        0.662
       ]
     },
     "match_recall": {
-      "mean": 0.92,
-      "min": 0.8667,
+      "mean": 0.9551,
+      "min": 0.9184,
+      "max": 0.9796,
+      "stdev": 0.02,
+      "n": 5,
+      "samples": [
+        0.9592,
+        0.9796,
+        0.9184,
+        0.9592,
+        0.9592
+      ]
+    },
+    "compliance_gate_accuracy": {
+      "mean": 0.8833,
+      "min": 0.8167,
       "max": 0.9333,
-      "stdev": 0.0267,
+      "stdev": 0.0408,
       "n": 5,
       "samples": [
         0.8667,
         0.9333,
-        0.9333,
-        0.9333,
-        0.9333
-      ]
-    },
-    "compliance_gate_accuracy": {
-      "mean": 0.8889,
-      "min": 0.8333,
-      "max": 0.9444,
-      "stdev": 0.0351,
-      "n": 5,
-      "samples": [
-        0.8333,
-        0.9444,
-        0.8889,
-        0.8889,
-        0.8889
+        0.8167,
+        0.9167,
+        0.8833
       ]
     },
     "verdict_accuracy": {
-      "mean": 1,
-      "min": 1,
-      "max": 1,
+      "mean": 0.875,
+      "min": 0.875,
+      "max": 0.875,
       "stdev": 0,
       "n": 5,
       "samples": [
-        1,
-        1,
-        1,
-        1,
-        1
+        0.875,
+        0.875,
+        0.875,
+        0.875,
+        0.875
       ]
     },
     "score_in_range_accuracy": {
-      "mean": 1,
-      "min": 1,
-      "max": 1,
+      "mean": 0.875,
+      "min": 0.875,
+      "max": 0.875,
       "stdev": 0,
       "n": 5,
       "samples": [
-        1,
-        1,
-        1,
-        1,
-        1
+        0.875,
+        0.875,
+        0.875,
+        0.875,
+        0.875
       ]
     },
     "avg_input_tokens": {
-      "mean": 22271,
-      "min": 22271,
-      "max": 22271,
+      "mean": 22265,
+      "min": 22265,
+      "max": 22265,
       "stdev": 0,
       "n": 5,
       "samples": [
-        22271,
-        22271,
-        22271,
-        22271,
-        22271
+        22265,
+        22265,
+        22265,
+        22265,
+        22265
       ]
     },
     "avg_output_tokens": {
-      "mean": 2685.2,
-      "min": 2331,
-      "max": 2937,
-      "stdev": 220.2947,
+      "mean": 2804.8,
+      "min": 2700,
+      "max": 2931,
+      "stdev": 78.1496,
       "n": 5,
       "samples": [
-        2545,
-        2758,
-        2937,
-        2855,
-        2331
+        2843,
+        2700,
+        2761,
+        2789,
+        2931
       ]
     },
     "avg_cost_per_prd_usd": {
-      "mean": 0.1071,
-      "min": 0.1018,
-      "max": 0.1109,
-      "stdev": 0.0033,
+      "mean": 0.1089,
+      "min": 0.1073,
+      "max": 0.1108,
+      "stdev": 0.0012,
       "n": 5,
       "samples": [
-        0.105,
+        0.1094,
+        0.1073,
         0.1082,
-        0.1109,
-        0.1096,
-        0.1018
+        0.1086,
+        0.1108
       ]
     },
-    "total_run_cost_usd": 1.6064
+    "total_run_cost_usd": 4.3545
   },
   "pass_aggregates": [
     {
-      "match_precision": 0.5909090909090909,
-      "match_recall": 0.8666666666666667,
-      "compliance_gate_accuracy": 0.8333333333333334,
-      "verdict_accuracy": 1,
-      "score_in_range_accuracy": 1,
-      "avg_input_tokens": 22271,
-      "avg_output_tokens": 2545,
-      "avg_cost_per_prd_usd": 0.105,
-      "total_cost_usd": 0.315,
-      "prds_ok": 3,
+      "match_precision": 0.6619718309859155,
+      "match_recall": 0.9591836734693877,
+      "compliance_gate_accuracy": 0.8666666666666667,
+      "verdict_accuracy": 0.875,
+      "score_in_range_accuracy": 0.875,
+      "avg_input_tokens": 22265,
+      "avg_output_tokens": 2843,
+      "avg_cost_per_prd_usd": 0.1094,
+      "total_cost_usd": 0.8755,
+      "prds_ok": 8,
       "prds_failed": 0
     },
     {
-      "match_precision": 0.6363636363636364,
-      "match_recall": 0.9333333333333333,
-      "compliance_gate_accuracy": 0.9444444444444444,
-      "verdict_accuracy": 1,
-      "score_in_range_accuracy": 1,
-      "avg_input_tokens": 22271,
-      "avg_output_tokens": 2758,
+      "match_precision": 0.7384615384615385,
+      "match_recall": 0.9795918367346939,
+      "compliance_gate_accuracy": 0.9333333333333333,
+      "verdict_accuracy": 0.875,
+      "score_in_range_accuracy": 0.875,
+      "avg_input_tokens": 22265,
+      "avg_output_tokens": 2700,
+      "avg_cost_per_prd_usd": 0.1073,
+      "total_cost_usd": 0.8583,
+      "prds_ok": 8,
+      "prds_failed": 0
+    },
+    {
+      "match_precision": 0.703125,
+      "match_recall": 0.9183673469387755,
+      "compliance_gate_accuracy": 0.8166666666666667,
+      "verdict_accuracy": 0.875,
+      "score_in_range_accuracy": 0.875,
+      "avg_input_tokens": 22265,
+      "avg_output_tokens": 2761,
       "avg_cost_per_prd_usd": 0.1082,
-      "total_cost_usd": 0.3245,
-      "prds_ok": 3,
+      "total_cost_usd": 0.8656,
+      "prds_ok": 8,
       "prds_failed": 0
     },
     {
-      "match_precision": 0.6363636363636364,
-      "match_recall": 0.9333333333333333,
-      "compliance_gate_accuracy": 0.8888888888888888,
-      "verdict_accuracy": 1,
-      "score_in_range_accuracy": 1,
-      "avg_input_tokens": 22271,
-      "avg_output_tokens": 2937,
-      "avg_cost_per_prd_usd": 0.1109,
-      "total_cost_usd": 0.3326,
-      "prds_ok": 3,
+      "match_precision": 0.6527777777777778,
+      "match_recall": 0.9591836734693877,
+      "compliance_gate_accuracy": 0.9166666666666666,
+      "verdict_accuracy": 0.875,
+      "score_in_range_accuracy": 0.875,
+      "avg_input_tokens": 22265,
+      "avg_output_tokens": 2789,
+      "avg_cost_per_prd_usd": 0.1086,
+      "total_cost_usd": 0.869,
+      "prds_ok": 8,
       "prds_failed": 0
     },
     {
-      "match_precision": 0.6363636363636364,
-      "match_recall": 0.9333333333333333,
-      "compliance_gate_accuracy": 0.8888888888888888,
-      "verdict_accuracy": 1,
-      "score_in_range_accuracy": 1,
-      "avg_input_tokens": 22271,
-      "avg_output_tokens": 2855,
-      "avg_cost_per_prd_usd": 0.1096,
-      "total_cost_usd": 0.3289,
-      "prds_ok": 3,
-      "prds_failed": 0
-    },
-    {
-      "match_precision": 0.6666666666666666,
-      "match_recall": 0.9333333333333333,
-      "compliance_gate_accuracy": 0.8888888888888888,
-      "verdict_accuracy": 1,
-      "score_in_range_accuracy": 1,
-      "avg_input_tokens": 22271,
-      "avg_output_tokens": 2331,
-      "avg_cost_per_prd_usd": 0.1018,
-      "total_cost_usd": 0.3054,
-      "prds_ok": 3,
+      "match_precision": 0.6619718309859155,
+      "match_recall": 0.9591836734693877,
+      "compliance_gate_accuracy": 0.8833333333333333,
+      "verdict_accuracy": 0.875,
+      "score_in_range_accuracy": 0.875,
+      "avg_input_tokens": 22265,
+      "avg_output_tokens": 2931,
+      "avg_cost_per_prd_usd": 0.1108,
+      "total_cost_usd": 0.8861,
+      "prds_ok": 8,
       "prds_failed": 0
     }
   ],
@@ -196,16 +196,16 @@
         100
       ],
       "tool_precision": {
-        "mean": 1,
-        "min": 1,
+        "mean": 0.96,
+        "min": 0.8,
         "max": 1,
-        "stdev": 0,
+        "stdev": 0.08,
         "n": 5,
         "samples": [
           1,
           1,
           1,
-          1,
+          0.8,
           1
         ]
       },
@@ -224,31 +224,31 @@
         ]
       },
       "status_accuracy": {
-        "mean": 0.85,
-        "min": 0.75,
+        "mean": 1,
+        "min": 1,
         "max": 1,
-        "stdev": 0.1225,
+        "stdev": 0,
         "n": 5,
         "samples": [
-          0.75,
           1,
-          0.75,
           1,
-          0.75
+          1,
+          1,
+          1
         ]
       },
       "score": {
-        "mean": 92.8,
-        "min": 88,
+        "mean": 100,
+        "min": 100,
         "max": 100,
-        "stdev": 5.8788,
+        "stdev": 0,
         "n": 5,
         "samples": [
-          88,
           100,
-          88,
           100,
-          88
+          100,
+          100,
+          100
         ]
       },
       "verdict_match_rate": 1,
@@ -260,7 +260,7 @@
         "actual_verdict": "GO",
         "expected_verdict": "GO",
         "verdict_match": true,
-        "actual_score": 88,
+        "actual_score": 100,
         "expected_score_range": [
           85,
           100
@@ -274,14 +274,14 @@
         "expected_tool_total": 4,
         "tool_precision": 1,
         "tool_recall": 1,
-        "status_matches": 3,
+        "status_matches": 4,
         "status_total": 4,
-        "status_accuracy": 0.75,
+        "status_accuracy": 1,
         "usage": {
           "input_tokens": 22291,
-          "output_tokens": 1141
+          "output_tokens": 983
         },
-        "cost_usd": 0.083988,
+        "cost_usd": 0.081618,
         "pair_details": [
           {
             "expected_capability": "Fetch all transactions for the statement month",
@@ -323,8 +323,8 @@
             "actual_tool": "statement_generator",
             "tool_match": true,
             "expected_status": "covered",
-            "actual_status": "partial",
-            "status_match": false,
+            "actual_status": "covered",
+            "status_match": true,
             "similarity": 1.1
           }
         ],
@@ -338,63 +338,63 @@
       "runs": 5,
       "ok_count": 5,
       "expected_score_range": [
-        45,
-        65
+        42,
+        75
       ],
       "tool_precision": {
-        "mean": 0.7714,
-        "min": 0.6667,
+        "mean": 0.7452,
+        "min": 0.5714,
         "max": 0.8571,
-        "stdev": 0.0679,
+        "stdev": 0.1015,
         "n": 5,
         "samples": [
           0.8333,
           0.8571,
-          0.75,
-          0.6667,
+          0.5714,
+          0.7143,
           0.75
         ]
       },
       "tool_recall": {
-        "mean": 0.9667,
-        "min": 0.8333,
+        "mean": 0.8667,
+        "min": 0.6667,
         "max": 1,
-        "stdev": 0.0667,
+        "stdev": 0.1247,
         "n": 5,
         "samples": [
           0.8333,
           1,
-          1,
-          1,
+          0.6667,
+          0.8333,
           1
         ]
       },
       "status_accuracy": {
-        "mean": 0.9714,
-        "min": 0.8571,
+        "mean": 0.8286,
+        "min": 0.5714,
         "max": 1,
-        "stdev": 0.0571,
+        "stdev": 0.1666,
         "n": 5,
         "samples": [
+          0.7143,
+          1,
+          0.5714,
           0.8571,
-          1,
-          1,
-          1,
           1
         ]
       },
       "score": {
-        "mean": 55.2,
-        "min": 49,
-        "max": 64,
-        "stdev": 5.98,
+        "mean": 56.2,
+        "min": 44,
+        "max": 73,
+        "stdev": 9.4106,
         "n": 5,
         "samples": [
-          49,
-          49,
-          54,
-          64,
-          60
+          44,
+          55,
+          73,
+          56,
+          53
         ]
       },
       "verdict_match_rate": 1,
@@ -406,106 +406,111 @@
         "actual_verdict": "NO-GO",
         "expected_verdict": "NO-GO",
         "verdict_match": true,
-        "actual_score": 49,
+        "actual_score": 44,
         "expected_score_range": [
-          45,
-          65
+          42,
+          75
         ],
         "score_in_range": true,
-        "paired_count": 6,
+        "paired_count": 7,
         "expected_count": 7,
-        "actual_capability_count": 7,
+        "actual_capability_count": 8,
         "tool_pick_correct": 5,
         "tool_pick_total": 6,
         "expected_tool_total": 6,
         "tool_precision": 0.8333333333333334,
         "tool_recall": 0.8333333333333334,
-        "status_matches": 6,
+        "status_matches": 5,
         "status_total": 7,
-        "status_accuracy": 0.8571428571428571,
+        "status_accuracy": 0.7142857142857143,
         "usage": {
           "input_tokens": 22260,
-          "output_tokens": 2374
+          "output_tokens": 2782
         },
-        "cost_usd": 0.10239,
+        "cost_usd": 0.10851,
         "pair_details": [
           {
             "expected_capability": "Notify cardholders one week before quarter end to pick next quarter's category",
-            "actual_requirement": "Send a notification to cardholders one week before quarter end prompting them to elect next quarter's category",
+            "actual_requirement": "Send notification to cardholders one week before quarter end to select next quarter's category",
             "expected_tool": "notification_dispatcher",
             "actual_tool": "notification_dispatcher",
             "tool_match": true,
             "expected_status": "risky",
             "actual_status": "risky",
             "status_match": true,
-            "similarity": 1.033
+            "similarity": 1.115
           },
           {
-            "expected_capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
-            "actual_requirement": "Calculate and award 3x reward points on spend in the customer's chosen merchant category, and 1x on all other spend",
-            "expected_tool": "rewards_points_engine",
-            "actual_tool": "rewards_points_engine",
-            "tool_match": true,
-            "expected_status": "risky",
-            "actual_status": "risky",
-            "status_match": true,
-            "similarity": 0.929
-          },
-          {
-            "expected_capability": "Send cardholders a monthly points-by-category breakdown",
-            "actual_requirement": "Generate a monthly breakdown of points earned by category for each cardholder",
-            "expected_tool": "rewards_points_engine",
-            "actual_tool": "rewards_points_engine",
-            "tool_match": true,
-            "expected_status": "risky",
-            "actual_status": "risky",
-            "status_match": true,
-            "similarity": 0.9
-          },
-          {
-            "expected_capability": "Categorize each card transaction by merchant type",
-            "actual_requirement": "Classify each transaction into its merchant category to apply the correct points rate",
-            "expected_tool": "transaction_categorizer",
-            "actual_tool": "transaction_categorizer",
+            "expected_capability": "Schedule the quarter-end reminder notification batch across the cardholder base",
+            "actual_requirement": "Schedule and trigger the quarterly reminder batch job",
+            "expected_tool": "batch_job_scheduler",
+            "actual_tool": "batch_job_scheduler",
             "tool_match": true,
             "expected_status": "covered",
             "actual_status": "covered",
             "status_match": true,
-            "similarity": 0.731
+            "similarity": 0.75
           },
           {
             "expected_capability": "Retrieve cardholder card and profile data to apply rewards logic and send notifications",
-            "actual_requirement": "Retrieve customer profile to validate cardholder eligibility and link category election to the correct account",
+            "actual_requirement": "Lookup cardholder profile and card account details to validate eligibility and retrieve account context",
             "expected_tool": "customer_profile_lookup",
             "actual_tool": "customer_profile_lookup",
             "tool_match": true,
             "expected_status": "risky",
             "actual_status": "risky",
             "status_match": true,
-            "similarity": 0.667
+            "similarity": 0.75
+          },
+          {
+            "expected_capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
+            "actual_requirement": "Cardholder selects one merchant category per quarter for 3x rewards multiplier",
+            "expected_tool": "rewards_points_engine",
+            "actual_tool": "rewards_points_engine",
+            "tool_match": true,
+            "expected_status": "risky",
+            "actual_status": "risky",
+            "status_match": true,
+            "similarity": 0.625
+          },
+          {
+            "expected_capability": "Categorize each card transaction by merchant type",
+            "actual_requirement": "Apply 3x points multiplier to transactions in the selected merchant category; apply 1x to all other spend",
+            "expected_tool": "transaction_categorizer",
+            "actual_tool": "transaction_categorizer",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "partial",
+            "status_match": false,
+            "similarity": 0.567
+          },
+          {
+            "expected_capability": "Send cardholders a monthly points-by-category breakdown",
+            "actual_requirement": "Monthly breakdown of points earned by category displayed to the cardholder",
+            "expected_tool": "rewards_points_engine",
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "risky",
+            "actual_status": "missing",
+            "status_match": false,
+            "similarity": 0.444
           },
           {
             "expected_capability": "Persist each customer's chosen category for the quarter",
-            "actual_requirement": "Store and persist the customer's chosen quarterly category for the duration of the quarter (no mid-quarter changes)",
+            "actual_requirement": "Persist the chosen category for the full calendar quarter and block mid-quarter changes",
             "expected_tool": null,
             "actual_tool": null,
             "tool_match": false,
             "expected_status": "missing",
             "actual_status": "missing",
             "status_match": true,
-            "similarity": 0.505
+            "similarity": 0.414
           }
         ],
-        "unmatched_expected": [
-          {
-            "capability": "Schedule the quarter-end reminder notification batch across the cardholder base",
-            "expected_status": "covered",
-            "expected_tool": "batch_job_scheduler"
-          }
-        ],
+        "unmatched_expected": [],
         "unmatched_actual": [
           {
-            "requirement": "Write an immutable audit record each time a category election is made or a points multiplier decision is applied",
+            "requirement": "Write an audit record for each category selection and points award decision",
             "status": "covered",
             "matched_tool": "audit_log_writer"
           }
@@ -522,17 +527,17 @@
         75
       ],
       "tool_precision": {
-        "mean": 0.3972,
+        "mean": 0.3677,
         "min": 0.3333,
         "max": 0.4444,
-        "stdev": 0.044,
+        "stdev": 0.0407,
         "n": 5,
         "samples": [
-          0.3333,
           0.3636,
-          0.4,
+          0.3636,
           0.4444,
-          0.4444
+          0.3333,
+          0.3333
         ]
       },
       "tool_recall": {
@@ -564,17 +569,17 @@
         ]
       },
       "score": {
-        "mean": 61.4,
+        "mean": 61.8,
         "min": 53,
-        "max": 67,
-        "stdev": 4.8415,
+        "max": 70,
+        "stdev": 6.6151,
         "n": 5,
         "samples": [
-          62,
-          67,
-          60,
+          70,
+          59,
           53,
-          65
+          69,
+          58
         ]
       },
       "verdict_match_rate": 1,
@@ -586,7 +591,7 @@
         "actual_verdict": "NO-GO",
         "expected_verdict": "NO-GO",
         "verdict_match": true,
-        "actual_score": 62,
+        "actual_score": 70,
         "expected_score_range": [
           50,
           75
@@ -594,21 +599,32 @@
         "score_in_range": true,
         "paired_count": 7,
         "expected_count": 7,
-        "actual_capability_count": 15,
+        "actual_capability_count": 14,
         "tool_pick_correct": 4,
-        "tool_pick_total": 12,
+        "tool_pick_total": 11,
         "expected_tool_total": 5,
-        "tool_precision": 0.3333333333333333,
+        "tool_precision": 0.36363636363636365,
         "tool_recall": 0.8,
         "status_matches": 6,
         "status_total": 7,
         "status_accuracy": 0.8571428571428571,
         "usage": {
           "input_tokens": 22263,
-          "output_tokens": 4119
+          "output_tokens": 3618
         },
-        "cost_usd": 0.128574,
+        "cost_usd": 0.121059,
         "pair_details": [
+          {
+            "expected_capability": "KYC-verify customer identity before enabling crypto access",
+            "actual_requirement": "KYC-verify customer identity before enabling crypto access",
+            "expected_tool": "kyc_verification_service",
+            "actual_tool": "kyc_verification_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
           {
             "expected_capability": "Generate quarterly regulatory reports covering crypto activity",
             "actual_requirement": "Generate quarterly regulatory reports covering crypto activity",
@@ -632,26 +648,26 @@
             "similarity": 1.333
           },
           {
-            "expected_capability": "KYC-verify customer identity before enabling crypto access",
-            "actual_requirement": "KYC identity verification before crypto access is enabled",
-            "expected_tool": "kyc_verification_service",
-            "actual_tool": "kyc_verification_service",
+            "expected_capability": "Screen customer against AML and sanctions lists",
+            "actual_requirement": "Screen customers against AML lists before crypto access is enabled",
+            "expected_tool": "aml_screening_api",
+            "actual_tool": "aml_screening_api",
             "tool_match": true,
             "expected_status": "covered",
             "actual_status": "covered",
             "status_match": true,
-            "similarity": 1
+            "similarity": 0.864
           },
           {
             "expected_capability": "Display real-time BTC and ETH prices in the app",
-            "actual_requirement": "Display real-time BTC and ETH prices in the mobile app",
+            "actual_requirement": "Display real-time BTC and ETH prices in USD in the mobile app",
             "expected_tool": "market_data_feed",
             "actual_tool": null,
             "tool_match": false,
             "expected_status": "partial",
             "actual_status": "missing",
             "status_match": false,
-            "similarity": 0.875
+            "similarity": 0.778
           },
           {
             "expected_capability": "Execute buy/sell trades of BTC and ETH against USD",
@@ -665,38 +681,32 @@
             "similarity": 0.595
           },
           {
-            "expected_capability": "Screen customer against AML and sanctions lists",
-            "actual_requirement": "AML screening before crypto access is enabled",
-            "expected_tool": "aml_screening_api",
-            "actual_tool": "aml_screening_api",
-            "tool_match": true,
-            "expected_status": "covered",
-            "actual_status": "covered",
-            "status_match": true,
-            "similarity": 0.591
-          },
-          {
             "expected_capability": "Custody customer Bitcoin and Ethereum wallets in cold storage",
-            "actual_requirement": "Manage customer crypto wallet custody (cold storage deposits and withdrawals)",
+            "actual_requirement": "Manage customer crypto wallets in cold storage (deposit and withdrawal of BTC/ETH)",
             "expected_tool": null,
             "actual_tool": null,
             "tool_match": false,
             "expected_status": "missing",
             "actual_status": "missing",
             "status_match": true,
-            "similarity": 0.383
+            "similarity": 0.358
           }
         ],
         "unmatched_expected": [],
         "unmatched_actual": [
           {
-            "requirement": "Sanctions list screening before crypto access is enabled",
+            "requirement": "Screen customers against sanctions lists before crypto access is enabled",
             "status": "covered",
             "matched_tool": "sanctions_realtime_check"
           },
           {
-            "requirement": "Monitor crypto transactions for suspicious patterns (AML transaction monitoring)",
-            "status": "partial",
+            "requirement": "Fetch customer profile to confirm eligibility and KYC status",
+            "status": "risky",
+            "matched_tool": "customer_profile_lookup"
+          },
+          {
+            "requirement": "Screen crypto transactions for AML / suspicious activity monitoring",
+            "status": "covered",
             "matched_tool": "transaction_monitoring_engine"
           },
           {
@@ -705,32 +715,1084 @@
             "matched_tool": "audit_log_writer"
           },
           {
-            "requirement": "Fetch customer profile to gate crypto feature access and personalise experience",
+            "requirement": "Check customer consent for crypto product data usage (GDPR/CCPA)",
+            "status": "covered",
+            "matched_tool": "customer_consent_manager"
+          },
+          {
+            "requirement": "Score sessions and detect fraud signals for crypto transactions",
+            "status": "covered",
+            "matched_tool": "fraud_risk_scorer"
+          },
+          {
+            "requirement": "Send customer notifications for crypto transaction confirmations and alerts",
+            "status": "covered",
+            "matched_tool": "notification_dispatcher"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prd_004",
+      "title": "Personal Loan Origination",
+      "runs": 5,
+      "ok_count": 5,
+      "expected_score_range": [
+        54,
+        82
+      ],
+      "tool_precision": {
+        "mean": 0.5427,
+        "min": 0.5,
+        "max": 0.6364,
+        "stdev": 0.0499,
+        "n": 5,
+        "samples": [
+          0.5385,
+          0.5385,
+          0.6364,
+          0.5,
+          0.5
+        ]
+      },
+      "tool_recall": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "status_accuracy": {
+        "mean": 0.8667,
+        "min": 0.7778,
+        "max": 1,
+        "stdev": 0.0831,
+        "n": 5,
+        "samples": [
+          0.7778,
+          0.8889,
+          0.8889,
+          1,
+          0.7778
+        ]
+      },
+      "score": {
+        "mean": 72.2,
+        "min": 56,
+        "max": 80,
+        "stdev": 8.3522,
+        "n": 5,
+        "samples": [
+          56,
+          74,
+          75,
+          76,
+          80
+        ]
+      },
+      "verdict_match_rate": 1,
+      "score_in_range_rate": 1,
+      "sample_detail": {
+        "id": "prd_004",
+        "title": "Personal Loan Origination",
+        "ok": true,
+        "actual_verdict": "NO-GO",
+        "expected_verdict": "NO-GO",
+        "verdict_match": true,
+        "actual_score": 56,
+        "expected_score_range": [
+          54,
+          82
+        ],
+        "score_in_range": true,
+        "paired_count": 9,
+        "expected_count": 9,
+        "actual_capability_count": 15,
+        "tool_pick_correct": 7,
+        "tool_pick_total": 13,
+        "expected_tool_total": 7,
+        "tool_precision": 0.5384615384615384,
+        "tool_recall": 1,
+        "status_matches": 7,
+        "status_total": 9,
+        "status_accuracy": 0.7777777777777778,
+        "usage": {
+          "input_tokens": 22283,
+          "output_tokens": 3796
+        },
+        "cost_usd": 0.123789,
+        "pair_details": [
+          {
+            "expected_capability": "Verify the applicant's income",
+            "actual_requirement": "Verify applicant income",
+            "expected_tool": "income_verification_service",
+            "actual_tool": "income_verification_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Capture the applicant's e-signature on the loan agreement",
+            "actual_requirement": "Capture e-signature on loan agreement",
+            "expected_tool": "e_signature_service",
+            "actual_tool": "e_signature_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.3
+          },
+          {
+            "expected_capability": "Score the applicant's credit risk for the lending decision",
+            "actual_requirement": "Score credit risk to make a lending decision",
+            "expected_tool": "credit_risk_model",
+            "actual_tool": "credit_risk_model",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "risky",
+            "status_match": false,
+            "similarity": 1.214
+          },
+          {
+            "expected_capability": "Pull the applicant's credit report from the bureau",
+            "actual_requirement": "Pull credit report from external bureau",
+            "expected_tool": "credit_bureau_pull",
+            "actual_tool": "credit_bureau_pull",
+            "tool_match": true,
+            "expected_status": "risky",
+            "actual_status": "risky",
+            "status_match": true,
+            "similarity": 1.167
+          },
+          {
+            "expected_capability": "Present a risk-based personalized interest rate to the applicant",
+            "actual_requirement": "Generate a risk-based personalized interest rate for approved applicants",
+            "expected_tool": "interest_rate_service",
+            "actual_tool": "interest_rate_service",
+            "tool_match": true,
+            "expected_status": "partial",
+            "actual_status": "risky",
+            "status_match": false,
+            "similarity": 1
+          },
+          {
+            "expected_capability": "Verify the applicant's identity via KYC before origination",
+            "actual_requirement": "Verify applicant identity",
+            "expected_tool": "kyc_verification_service",
+            "actual_tool": "kyc_verification_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 0.929
+          },
+          {
+            "expected_capability": "Calculate the loan amortization schedule",
+            "actual_requirement": "Generate a loan amortization schedule for approved applicants",
+            "expected_tool": "loan_amortization_calculator",
+            "actual_tool": "loan_amortization_calculator",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 0.929
+          },
+          {
+            "expected_capability": "Perform fair-lending disparate-impact monitoring across decisions",
+            "actual_requirement": "Run fair-lending disparate-impact monitoring across all loan decisions",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 0.686
+          },
+          {
+            "expected_capability": "Generate and send ECOA adverse-action notices to declined applicants",
+            "actual_requirement": "Send adverse-action notice to declined applicants",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 0.606
+          }
+        ],
+        "unmatched_expected": [],
+        "unmatched_actual": [
+          {
+            "requirement": "Evaluate product eligibility rules",
+            "status": "risky",
+            "matched_tool": "eligibility_rules_api"
+          },
+          {
+            "requirement": "Disburse funds to applicant account after approval and signing",
+            "status": "risky",
+            "matched_tool": "ach_payment_processor"
+          },
+          {
+            "requirement": "Write immutable audit log for each decision and regulated action",
+            "status": "covered",
+            "matched_tool": "audit_log_writer"
+          },
+          {
+            "requirement": "Check and record customer consent (GDPR/CCPA) for data use during application",
+            "status": "covered",
+            "matched_tool": "customer_consent_manager"
+          },
+          {
+            "requirement": "Screen applicant against AML and sanctions lists",
+            "status": "risky",
+            "matched_tool": "aml_screening_api"
+          },
+          {
+            "requirement": "Fetch customer profile and KYC status to pre-populate application",
+            "status": "risky",
+            "matched_tool": "customer_profile_lookup"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prd_005",
+      "title": "Domestic Wire Transfer",
+      "runs": 5,
+      "ok_count": 5,
+      "expected_score_range": [
+        88,
+        100
+      ],
+      "tool_precision": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "tool_recall": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "status_accuracy": {
+        "mean": 0.9714,
+        "min": 0.8571,
+        "max": 1,
+        "stdev": 0.0571,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          0.8571,
+          1,
+          1
+        ]
+      },
+      "score": {
+        "mean": 98.6,
+        "min": 93,
+        "max": 100,
+        "stdev": 2.8,
+        "n": 5,
+        "samples": [
+          100,
+          100,
+          93,
+          100,
+          100
+        ]
+      },
+      "verdict_match_rate": 1,
+      "score_in_range_rate": 1,
+      "sample_detail": {
+        "id": "prd_005",
+        "title": "Domestic Wire Transfer",
+        "ok": true,
+        "actual_verdict": "GO",
+        "expected_verdict": "GO",
+        "verdict_match": true,
+        "actual_score": 100,
+        "expected_score_range": [
+          88,
+          100
+        ],
+        "score_in_range": true,
+        "paired_count": 7,
+        "expected_count": 7,
+        "actual_capability_count": 7,
+        "tool_pick_correct": 7,
+        "tool_pick_total": 7,
+        "expected_tool_total": 7,
+        "tool_precision": 1,
+        "tool_recall": 1,
+        "status_matches": 7,
+        "status_total": 7,
+        "status_accuracy": 1,
+        "usage": {
+          "input_tokens": 22246,
+          "output_tokens": 1362
+        },
+        "cost_usd": 0.087168,
+        "pair_details": [
+          {
+            "expected_capability": "Screen the transfer against real-time sanctions lists",
+            "actual_requirement": "Screen transfer against real-time sanctions lists",
+            "expected_tool": "sanctions_realtime_check",
+            "actual_tool": "sanctions_realtime_check",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Initiate the domestic wire transfer",
+            "actual_requirement": "Initiate the domestic wire transfer",
+            "expected_tool": "wire_transfer_initiator",
+            "actual_tool": "wire_transfer_initiator",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Authenticate the customer with a one-time passcode for step-up",
+            "actual_requirement": "Authenticate customer with a one-time passcode",
+            "expected_tool": "otp_delivery_service",
+            "actual_tool": "otp_delivery_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.333
+          },
+          {
+            "expected_capability": "Post the debit and credit to the general ledger",
+            "actual_requirement": "Post debit and credit entries to the general ledger",
+            "expected_tool": "ledger_posting_service",
+            "actual_tool": "ledger_posting_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.333
+          },
+          {
+            "expected_capability": "Write an immutable audit-log entry for the transfer",
+            "actual_requirement": "Write an immutable audit-log entry on success",
+            "expected_tool": "audit_log_writer",
+            "actual_tool": "audit_log_writer",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.214
+          },
+          {
+            "expected_capability": "Score the transfer for fraud risk in real time",
+            "actual_requirement": "Score transfer for fraud risk",
+            "expected_tool": "fraud_risk_scorer",
+            "actual_tool": "fraud_risk_scorer",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.167
+          },
+          {
+            "expected_capability": "Validate the saved beneficiary/payee details",
+            "actual_requirement": "Validate saved beneficiary for the transfer",
+            "expected_tool": "beneficiary_manager",
+            "actual_tool": "beneficiary_manager",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1
+          }
+        ],
+        "unmatched_expected": [],
+        "unmatched_actual": []
+      }
+    },
+    {
+      "id": "prd_006",
+      "title": "Robo-Advisory Portfolio Management",
+      "runs": 5,
+      "ok_count": 5,
+      "expected_score_range": [
+        54,
+        74
+      ],
+      "tool_precision": {
+        "mean": 0.4735,
+        "min": 0.4167,
+        "max": 0.625,
+        "stdev": 0.0776,
+        "n": 5,
+        "samples": [
+          0.4545,
+          0.625,
+          0.4167,
+          0.4545,
+          0.4167
+        ]
+      },
+      "tool_recall": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "status_accuracy": {
+        "mean": 0.85,
+        "min": 0.75,
+        "max": 0.875,
+        "stdev": 0.05,
+        "n": 5,
+        "samples": [
+          0.75,
+          0.875,
+          0.875,
+          0.875,
+          0.875
+        ]
+      },
+      "score": {
+        "mean": 66.4,
+        "min": 57,
+        "max": 72,
+        "stdev": 5.3516,
+        "n": 5,
+        "samples": [
+          67,
+          57,
+          72,
+          71,
+          65
+        ]
+      },
+      "verdict_match_rate": 1,
+      "score_in_range_rate": 1,
+      "sample_detail": {
+        "id": "prd_006",
+        "title": "Robo-Advisory Portfolio Management",
+        "ok": true,
+        "actual_verdict": "NO-GO",
+        "expected_verdict": "NO-GO",
+        "verdict_match": true,
+        "actual_score": 67,
+        "expected_score_range": [
+          54,
+          74
+        ],
+        "score_in_range": true,
+        "paired_count": 8,
+        "expected_count": 8,
+        "actual_capability_count": 14,
+        "tool_pick_correct": 5,
+        "tool_pick_total": 11,
+        "expected_tool_total": 5,
+        "tool_precision": 0.45454545454545453,
+        "tool_recall": 1,
+        "status_matches": 6,
+        "status_total": 8,
+        "status_accuracy": 0.75,
+        "usage": {
+          "input_tokens": 22255,
+          "output_tokens": 3907
+        },
+        "cost_usd": 0.12537,
+        "pair_details": [
+          {
+            "expected_capability": "Retrieve the client's current portfolio holdings",
+            "actual_requirement": "Retrieve client's current investment portfolio holdings",
+            "expected_tool": "investment_portfolio_service",
+            "actual_tool": "investment_portfolio_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.333
+          },
+          {
+            "expected_capability": "Execute rebalancing trades",
+            "actual_requirement": "Execute rebalancing trades (equity and ETF)",
+            "expected_tool": "trade_execution_service",
+            "actual_tool": "trade_execution_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.1
+          },
+          {
+            "expected_capability": "Generate automated investment recommendations",
+            "actual_requirement": "Generate automated investment recommendations based on suitability profile",
+            "expected_tool": "robo_advisor_engine",
+            "actual_tool": "robo_advisor_engine",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.071
+          },
+          {
+            "expected_capability": "Run tax-loss harvesting optimization",
+            "actual_requirement": "Run tax-loss harvesting optimization",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 1.05
+          },
+          {
+            "expected_capability": "Generate the quarterly portfolio performance statement",
+            "actual_requirement": "Produce quarterly portfolio performance statements",
+            "expected_tool": "statement_generator",
+            "actual_tool": "statement_generator",
+            "tool_match": true,
+            "expected_status": "partial",
+            "actual_status": "partial",
+            "status_match": true,
+            "similarity": 0.929
+          },
+          {
+            "expected_capability": "Send rebalancing and performance notifications to clients",
+            "actual_requirement": "Notify clients of portfolio changes, rebalancing events, and threshold breaches",
+            "expected_tool": "notification_dispatcher",
+            "actual_tool": "notification_dispatcher",
+            "tool_match": true,
+            "expected_status": "risky",
+            "actual_status": "covered",
+            "status_match": false,
+            "similarity": 0.682
+          },
+          {
+            "expected_capability": "Assess the client's risk tolerance and investment suitability via questionnaire",
+            "actual_requirement": "Collect and store client risk-tolerance and suitability questionnaire responses",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 0.505
+          },
+          {
+            "expected_capability": "Continuously monitor portfolio drift and auto-trigger rebalancing",
+            "actual_requirement": "Auto-trigger rebalancing workflow when drift threshold is breached",
+            "expected_tool": null,
+            "actual_tool": "batch_job_scheduler",
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "partial",
+            "status_match": false,
+            "similarity": 0.364
+          }
+        ],
+        "unmatched_expected": [],
+        "unmatched_actual": [
+          {
+            "requirement": "Continuously monitor portfolio drift against target allocations and detect threshold breaches",
+            "status": "missing",
+            "matched_tool": null
+          },
+          {
+            "requirement": "Retrieve current market data / prices for portfolio valuation and rebalancing calculations",
+            "status": "covered",
+            "matched_tool": "market_data_feed"
+          },
+          {
+            "requirement": "Check customer eligibility for robo-advisor product enrollment",
+            "status": "covered",
+            "matched_tool": "eligibility_rules_api"
+          },
+          {
+            "requirement": "Fetch customer profile and KYC status to validate investor identity before enrollment",
             "status": "risky",
             "matched_tool": "customer_profile_lookup"
           },
           {
-            "requirement": "Send customer notifications for crypto trade confirmations, deposits, and withdrawals",
+            "requirement": "Write immutable audit log entries for all regulated investment actions (recommendations, trades, rebalancing decisions)",
             "status": "covered",
-            "matched_tool": "notification_dispatcher"
+            "matched_tool": "audit_log_writer"
           },
           {
-            "requirement": "Score crypto transactions for real-time fraud risk",
-            "status": "partial",
-            "matched_tool": "fraud_risk_scorer"
+            "requirement": "Record and verify customer consent for automated investment management and data use",
+            "status": "covered",
+            "matched_tool": "customer_consent_manager"
+          }
+        ]
+      }
+    },
+    {
+      "id": "prd_007",
+      "title": "Real-Time Card Fraud Scoring",
+      "runs": 5,
+      "ok_count": 5,
+      "expected_score_range": [
+        82,
+        98
+      ],
+      "tool_precision": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "tool_recall": {
+        "mean": 1,
+        "min": 1,
+        "max": 1,
+        "stdev": 0,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "status_accuracy": {
+        "mean": 0.9714,
+        "min": 0.8571,
+        "max": 1,
+        "stdev": 0.0571,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          0.8571,
+          1,
+          1
+        ]
+      },
+      "score": {
+        "mean": 77.4,
+        "min": 71,
+        "max": 79,
+        "stdev": 3.2,
+        "n": 5,
+        "samples": [
+          79,
+          79,
+          71,
+          79,
+          79
+        ]
+      },
+      "verdict_match_rate": 0,
+      "score_in_range_rate": 0,
+      "sample_detail": {
+        "id": "prd_007",
+        "title": "Real-Time Card Fraud Scoring",
+        "ok": true,
+        "actual_verdict": "NO-GO",
+        "expected_verdict": "GO",
+        "verdict_match": false,
+        "actual_score": 79,
+        "expected_score_range": [
+          82,
+          98
+        ],
+        "score_in_range": false,
+        "paired_count": 7,
+        "expected_count": 7,
+        "actual_capability_count": 8,
+        "tool_pick_correct": 7,
+        "tool_pick_total": 7,
+        "expected_tool_total": 7,
+        "tool_precision": 1,
+        "tool_recall": 1,
+        "status_matches": 7,
+        "status_total": 7,
+        "status_accuracy": 1,
+        "usage": {
+          "input_tokens": 22250,
+          "output_tokens": 2390
+        },
+        "cost_usd": 0.1026,
+        "pair_details": [
+          {
+            "expected_capability": "Monitor transactions for suspicious patterns",
+            "actual_requirement": "Monitor transactions for suspicious patterns",
+            "expected_tool": "transaction_monitoring_engine",
+            "actual_tool": "transaction_monitoring_engine",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
           },
           {
-            "requirement": "Classify/route customer chat intents related to crypto within the mobile app",
-            "status": "partial",
-            "matched_tool": "chatbot_intent_classifier"
+            "expected_capability": "Notify the cardholder of a suspected-fraud hold",
+            "actual_requirement": "Notify the cardholder of a suspected-fraud hold",
+            "expected_tool": "notification_dispatcher",
+            "actual_tool": "notification_dispatcher",
+            "tool_match": true,
+            "expected_status": "risky",
+            "actual_status": "risky",
+            "status_match": true,
+            "similarity": 1.5
           },
           {
-            "requirement": "Evaluate product eligibility for crypto custody feature access",
+            "expected_capability": "Write immutable audit-log entries for flagged transactions",
+            "actual_requirement": "Write flagged transactions to an immutable audit log",
+            "expected_tool": "audit_log_writer",
+            "actual_tool": "audit_log_writer",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.357
+          },
+          {
+            "expected_capability": "Score the login session risk",
+            "actual_requirement": "Score the login session risk in real time",
+            "expected_tool": "session_risk_engine",
+            "actual_tool": "session_risk_engine",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.167
+          },
+          {
+            "expected_capability": "Authorize the card transaction in real time",
+            "actual_requirement": "Authorize the card transaction",
+            "expected_tool": "card_authorization_service",
+            "actual_tool": "card_authorization_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.1
+          },
+          {
+            "expected_capability": "Score the transaction for fraud risk",
+            "actual_requirement": "Score each card transaction for fraud risk in real time during authorization",
+            "expected_tool": "fraud_risk_scorer",
+            "actual_tool": "fraud_risk_scorer",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 0.9
+          },
+          {
+            "expected_capability": "Fingerprint the device for fraud signals",
+            "actual_requirement": "Fingerprint the device at authorization time",
+            "expected_tool": "device_fingerprint_service",
+            "actual_tool": "device_fingerprint_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 0.833
+          }
+        ],
+        "unmatched_expected": [],
+        "unmatched_actual": [
+          {
+            "requirement": "Orchestrate all fraud-scoring signals within a 150ms latency budget at authorization decision",
+            "status": "missing",
+            "matched_tool": null
+          }
+        ]
+      }
+    },
+    {
+      "id": "prd_008",
+      "title": "Mortgage Origination & Underwriting",
+      "runs": 5,
+      "ok_count": 5,
+      "expected_score_range": [
+        44,
+        74
+      ],
+      "tool_precision": {
+        "mean": 0.9111,
+        "min": 0.6667,
+        "max": 1,
+        "stdev": 0.1296,
+        "n": 5,
+        "samples": [
+          0.6667,
+          1,
+          1,
+          0.8889,
+          1
+        ]
+      },
+      "tool_recall": {
+        "mean": 0.95,
+        "min": 0.875,
+        "max": 1,
+        "stdev": 0.0612,
+        "n": 5,
+        "samples": [
+          1,
+          1,
+          0.875,
+          1,
+          0.875
+        ]
+      },
+      "status_accuracy": {
+        "mean": 0.8364,
+        "min": 0.7273,
+        "max": 0.9091,
+        "stdev": 0.0891,
+        "n": 5,
+        "samples": [
+          0.9091,
+          0.9091,
+          0.7273,
+          0.9091,
+          0.7273
+        ]
+      },
+      "score": {
+        "mean": 57.6,
+        "min": 46,
+        "max": 71,
+        "stdev": 10.012,
+        "n": 5,
+        "samples": [
+          71,
+          61,
+          46,
+          64,
+          46
+        ]
+      },
+      "verdict_match_rate": 1,
+      "score_in_range_rate": 1,
+      "sample_detail": {
+        "id": "prd_008",
+        "title": "Mortgage Origination & Underwriting",
+        "ok": true,
+        "actual_verdict": "NO-GO",
+        "expected_verdict": "NO-GO",
+        "verdict_match": true,
+        "actual_score": 71,
+        "expected_score_range": [
+          44,
+          74
+        ],
+        "score_in_range": true,
+        "paired_count": 11,
+        "expected_count": 11,
+        "actual_capability_count": 15,
+        "tool_pick_correct": 8,
+        "tool_pick_total": 12,
+        "expected_tool_total": 8,
+        "tool_precision": 0.6666666666666666,
+        "tool_recall": 1,
+        "status_matches": 10,
+        "status_total": 11,
+        "status_accuracy": 0.9090909090909091,
+        "usage": {
+          "input_tokens": 22271,
+          "output_tokens": 3902
+        },
+        "cost_usd": 0.125343,
+        "pair_details": [
+          {
+            "expected_capability": "Capture and validate the mortgage application",
+            "actual_requirement": "Capture and validate the mortgage application",
+            "expected_tool": "mortgage_application_intake",
+            "actual_tool": "mortgage_application_intake",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Verify the applicant's income",
+            "actual_requirement": "Verify applicant income",
+            "expected_tool": "income_verification_service",
+            "actual_tool": "income_verification_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Score credit risk for underwriting",
+            "actual_requirement": "Score credit risk for underwriting",
+            "expected_tool": "credit_risk_model",
+            "actual_tool": "credit_risk_model",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Capture e-signatures on closing documents",
+            "actual_requirement": "Capture e-signatures on closing documents",
+            "expected_tool": "e_signature_service",
+            "actual_tool": "e_signature_service",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.5
+          },
+          {
+            "expected_capability": "Extract data from uploaded financial documents",
+            "actual_requirement": "Extract structured data from uploaded financial documents",
+            "expected_tool": "document_ocr_extractor",
+            "actual_tool": "document_ocr_extractor",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.333
+          },
+          {
+            "expected_capability": "Pull the applicant's credit report",
+            "actual_requirement": "Pull applicant credit report from a bureau",
+            "expected_tool": "credit_bureau_pull",
+            "actual_tool": "credit_bureau_pull",
+            "tool_match": true,
+            "expected_status": "risky",
+            "actual_status": "risky",
+            "status_match": true,
+            "similarity": 1.3
+          },
+          {
+            "expected_capability": "Offer an interest-rate lock",
+            "actual_requirement": "Offer and lock an interest rate for the applicant",
+            "expected_tool": "interest_rate_service",
+            "actual_tool": "interest_rate_service",
+            "tool_match": true,
+            "expected_status": "partial",
+            "actual_status": "risky",
+            "status_match": false,
+            "similarity": 1.3
+          },
+          {
+            "expected_capability": "Value the collateral property",
+            "actual_requirement": "Value the collateral property for underwriting",
+            "expected_tool": "collateral_valuation_api",
+            "actual_tool": "collateral_valuation_api",
+            "tool_match": true,
+            "expected_status": "covered",
+            "actual_status": "covered",
+            "status_match": true,
+            "similarity": 1.25
+          },
+          {
+            "expected_capability": "Order a property appraisal from an approved appraiser",
+            "actual_requirement": "Order a property appraisal from an approved appraiser",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 1.05
+          },
+          {
+            "expected_capability": "Generate the TRID-compliant Loan Estimate and Closing Disclosure",
+            "actual_requirement": "Generate TRID-compliant Loan Estimate and Closing Disclosure documents",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 0.925
+          },
+          {
+            "expected_capability": "Perform flood-zone determination",
+            "actual_requirement": "Perform flood-zone determination for the subject property",
+            "expected_tool": null,
+            "actual_tool": null,
+            "tool_match": false,
+            "expected_status": "missing",
+            "actual_status": "missing",
+            "status_match": true,
+            "similarity": 0.717
+          }
+        ],
+        "unmatched_expected": [],
+        "unmatched_actual": [
+          {
+            "requirement": "Evaluate product eligibility for the mortgage applicant",
             "status": "covered",
             "matched_tool": "eligibility_rules_api"
+          },
+          {
+            "requirement": "Write immutable audit log entries for all regulated underwriting actions",
+            "status": "covered",
+            "matched_tool": "audit_log_writer"
+          },
+          {
+            "requirement": "Run KYC identity verification on the applicant",
+            "status": "covered",
+            "matched_tool": "kyc_verification_service"
+          },
+          {
+            "requirement": "Screen the applicant against AML and sanctions lists",
+            "status": "covered",
+            "matched_tool": "aml_screening_api"
           }
         ]
       }
     }
-  ]
+  ],
+  "reconciled_note": "score_in_range recomputed after v3 range calibration; all other metrics are the original 5-pass run."
 }
