@@ -11,48 +11,51 @@ below.
 
 ---
 
-## Latest baseline (dataset v2, post label-review)
+## Latest baseline (dataset v2, `--runs=5`)
 
-Run against the 3 seeded PRDs, all 3 completing, after the first label-review
-pass tightened the ground truth. **These are the numbers every future upgrade
-is measured against.** Full detail in [`results/latest.json`](results/latest.json).
+The authoritative baseline is a **5-pass distribution** (15 analyze calls),
+after the first label-review pass tightened the ground truth. **These are the
+numbers every future upgrade is measured against** — compare a change's 5-run
+distribution to this one. Full detail in [`results/latest.json`](results/latest.json).
 
-| Metric | v1 labels | **v2 labels** |
-|---|---|---|
-| **match_precision** | 50.0% (11/22) | **59.1%** (13/22) |
-| **match_recall** | 84.6% (11/13) | **86.7%** (13/15) |
-| **compliance_gate_accuracy** | 68.8% (11/16) | **72.2%** (13/18) |
-| **verdict_accuracy** | 66.7% (2/3) | **100%** (3/3) |
-| **score_in_range_accuracy** | 33.3% (1/3) | **100%** (3/3) |
-| **avg cost per PRD** | $0.10 | $0.11 |
-| **prds ok** | 3/3 | 3/3 |
+| Metric | mean | spread [min–max] | σ |
+|---|---|---|---|
+| **match_precision** | **63.3%** | 59.1–66.7% | 0.024 |
+| **match_recall** | **92.0%** | 86.7–93.3% | 0.027 |
+| **compliance_gate_accuracy** | **88.9%** | 83.3–94.4% | 0.035 |
+| **verdict_accuracy** | **100%** | 100–100% | 0.000 |
+| **score_in_range_accuracy** | **100%** | 100–100% | 0.000 |
+| **avg cost per PRD** | $0.107 | $0.102–0.111 | — |
+| **total run cost** | $1.61 | (15 calls) | — |
 
-> **The v1 → v2 jump is a label-quality improvement, not an engine change.** The
-> engine code was untouched between these runs; only the dataset labels were
-> corrected to match the standard above. verdict_accuracy hit 100% because
-> prd_001's PRD text was sharpened to scope generation only (it's a legitimate
-> GO again), and precision/gate rose because prd_002's PII-risky and prd_003's
-> ledger-covered labels now match what the engine actually and correctly does.
+> **Why this replaced the single-run snapshot.** The v2 commit reported a single
+> run with `compliance_gate_accuracy` 72.2% and `match_precision` 59.1%. The
+> 5-run distribution shows those were **low samples** — the true means are
+> **88.9%** and **63.3%**, with the single run sitting at or below the observed
+> minimum. This is exactly why single runs must not be used to judge a change:
+> one sample was ~16 points low on gate accuracy purely from LLM variance.
+> `verdict_accuracy` and `score_in_range_accuracy`, by contrast, are rock-solid
+> at 100% (σ 0.000) — those are stable signals; the matching metrics are the
+> variable ones.
 
 ### How to interpret these numbers
 
-**We have reached the point where most remaining disagreements are engine
-run-to-run variance, not label error.** The engine is non-deterministic: across
-runs the same capability legitimately flips (e.g. `statement_generator`
-covered↔partial, `transaction_categorizer` covered↔partial, the notification's
-risky flag depends on whether the LLM tags it PII that run, and the rewards calc
-sometimes matches `budgeting_insights_engine` instead of `rewards_points_engine`).
-The v2 labels encode the *defensible* ground truth; any single run will disagree
-on a few capabilities purely from LLM variance. Chasing 100% on one run is
-therefore the wrong goal — the metric ceiling is now set by engine variance, and
-the honest next step is **multi-run averaging** (see "What's NOT in scope yet")
-rather than more relabeling.
+**Most remaining disagreements are engine run-to-run variance, not label
+error.** The engine is non-deterministic: across runs the same capability
+legitimately flips (e.g. `statement_generator` covered↔partial,
+`transaction_categorizer` covered↔partial, the notification's risky flag depends
+on whether the LLM tags it PII that run, and the rewards calc sometimes matches
+`budgeting_insights_engine` instead of `rewards_points_engine`). The v2 labels
+encode the *defensible* ground truth; any single run disagrees on a few
+capabilities purely from LLM variance. That is why the baseline is a
+distribution — see "Measuring a baseline" for the standard.
 
-`compliance_gate_accuracy` (72.2%) is no longer primarily a label-quality
-signal — the labels now match the gate's design. Remaining gate misses are
-mostly the LLM's variable `required_clearances` assignment (whether it flags a
-given capability as PII-touching on a given run), which is an engine-determinism
-question, not a labeling one.
+`compliance_gate_accuracy` (88.9% mean) now matches the gate's design closely;
+its remaining spread (σ 0.035) is mostly the LLM's variable `required_clearances`
+assignment (whether it flags a given capability as PII-touching on a given run),
+an engine-determinism question, not a labeling one. `match_precision` (63.3%) is
+the metric most worth improving — dragged down by prd_003, where the engine's
+crypto tool picks are the least stable.
 
 On score ranges: **prd_003's band is `[50, 75]`** to contain its genuine
 run-to-run instability (55–70 observed) — peripheral `covered` capabilities
@@ -117,7 +120,8 @@ surfaced, tracked here until addressed (not fixable by relabeling).
 ## Running it
 
 ```bash
-npm run eval
+npm run eval                 # N=1, quick smoke check
+npm run eval -- --runs=5     # baseline-quality: 5 passes, mean + spread
 ```
 
 Reads `dataset/prds.json`, replays each PRD through the internal
@@ -126,6 +130,41 @@ no live-URL burn), and writes results to `results/latest.json`.
 
 Requires `.env.local` with `ANTHROPIC_API_KEY` and the
 `NEXT_PUBLIC_SUPABASE_*` vars set (already needed for `/demo`).
+
+---
+
+## Measuring a baseline (the standard for before/after comparisons)
+
+The engine is non-deterministic, so **a single run (`N=1`) is a noisy sample and
+must not be used to judge an engine change.** Across runs the same capability
+legitimately flips status, the LLM picks different tools, and scores swing by
+10+ points. One run can move a metric several points for no reason at all.
+
+**The standard: for any before/after comparison of an engine change, run
+`npm run eval -- --runs=5` on both sides and compare distributions, not single
+numbers.**
+
+- Each **pass** runs every PRD once; `N` passes give `N` independent samples of
+  every aggregate metric. The runner reports each metric as **mean, [min–max],
+  and σ (standard deviation)** across the passes.
+- **A change is only real signal if the means separate by more than the
+  spread.** If before is `0.58 ± 0.05` and after is `0.61 ± 0.06`, that overlap
+  is noise, not improvement — you need more runs or a bigger effect.
+- Record the mean and spread in the PR that makes the change. Use `--runs=5`
+  minimum for anything you'll cite; `--runs=1` is for smoke checks only.
+- Cost scales linearly: `N × (# PRDs)` analyze calls (~$0.10 each). `--runs=5`
+  on the 3 seeded PRDs is 15 calls, ~$1.60, ~5 min.
+
+Aggregation detail: each metric is computed per pass (ratio of that pass's
+sums), then the per-pass values are summarized. This is **mean-of-ratios**
+(the expected metric value on a typical run and its variability), which is what
+you want for variance — not ratio-of-pooled-sums.
+
+`results/latest.json` records `runs`, the summarized `metrics` (with `samples`
+arrays), every pass's raw aggregate in `pass_aggregates`, and per-PRD stat
+blocks. Full capability-level `pair_details` are stored for **pass 1 only** as a
+representative debugging sample (storing all N would bloat the file with
+redundant dumps).
 
 ---
 
@@ -373,5 +412,5 @@ Three PRDs are seeded to exercise the main engine paths. Target is 50 total.
 
 - CI wiring — the harness runs locally first; automated CI hookup is later.
 - Cost-optimization heuristics — token cost is measured, not tuned.
-- Multi-run stability — the harness runs each PRD once. LLM variance across
-  runs is not yet averaged.
+- Parallel passes — `--runs=N` runs sequentially to stay simple and avoid rate
+  limits; fine at the current scale (~5 min for 15 calls).

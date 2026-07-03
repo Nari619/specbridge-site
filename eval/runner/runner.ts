@@ -3,9 +3,17 @@
  *
  * Reads eval/dataset/prds.json, replays each PRD through runAnalysis() from
  * the analyze route (same pipeline as /demo — no HTTP), compares actual to
- * expected, and writes per-PRD + aggregate metrics to eval/results/latest.json.
+ * expected, and writes averaged metrics + per-metric spread to
+ * eval/results/latest.json.
  *
- * Run: `npm run eval`
+ * The engine is non-deterministic, so a single run is a noisy sample. Use
+ * multiple runs for a stable baseline:
+ *
+ *   npm run eval                # N=1, quick smoke check
+ *   npm run eval -- --runs=5    # baseline-quality: 5 passes, mean + spread
+ *
+ * Each pass runs every PRD once; N passes give N independent samples of every
+ * aggregate metric, reported as mean [min-max] with standard deviation.
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -44,6 +52,51 @@ type Dataset = {
   notes?: string;
   prds: Prd[];
 };
+
+// --- CLI ---
+function parseRuns(argv: string[]): number {
+  for (const a of argv) {
+    const m = a.match(/^--runs=(\d+)$/);
+    if (m) return Math.max(1, parseInt(m[1], 10));
+  }
+  const idx = argv.indexOf("--runs");
+  if (idx >= 0 && argv[idx + 1] && /^\d+$/.test(argv[idx + 1])) {
+    return Math.max(1, parseInt(argv[idx + 1], 10));
+  }
+  return 1;
+}
+
+// --- Stats ---
+type Stat = {
+  mean: number | null;
+  min: number | null;
+  max: number | null;
+  stdev: number | null;
+  n: number;
+  samples: number[];
+};
+const round = (x: number) => Number(x.toFixed(4));
+/** Summarize a list of samples (nulls/NaN dropped) into mean/min/max/stdev. */
+function statBlock(values: (number | null)[]): Stat {
+  const xs = values.filter(
+    (v): v is number => v !== null && Number.isFinite(v),
+  );
+  if (xs.length === 0) {
+    return { mean: null, min: null, max: null, stdev: null, n: 0, samples: [] };
+  }
+  const mean = xs.reduce((a, b) => a + b, 0) / xs.length;
+  const stdev = Math.sqrt(
+    xs.reduce((a, b) => a + (b - mean) ** 2, 0) / xs.length,
+  );
+  return {
+    mean: round(mean),
+    min: round(Math.min(...xs)),
+    max: round(Math.max(...xs)),
+    stdev: round(stdev),
+    n: xs.length,
+    samples: xs.map(round),
+  };
+}
 
 // --- Fuzzy capability pairing ---
 const STOP = new Set([
@@ -113,7 +166,7 @@ function pairCapabilities(actual: ActualCap[], expected: ExpectedMatch[]) {
   };
 }
 
-// --- Per-PRD run ---
+// --- Per-run result ---
 type PrdResultOk = {
   id: string;
   title: string;
@@ -170,11 +223,10 @@ type PrdResultErr = {
 };
 type PrdResult = PrdResultOk | PrdResultErr;
 
-async function runOne(prd: Prd, i: number, n: number): Promise<PrdResult> {
-  console.log(`\n[${i + 1}/${n}] ${prd.id}: ${prd.title}`);
+/** Run one PRD through the engine once and score it. Silent (no logging). */
+async function evaluateOne(prd: Prd): Promise<PrdResult> {
   const outcome = await runAnalysis(prd.prd_text);
   if (!outcome.ok) {
-    console.log(`  ✗ analysis failed: ${outcome.error}`);
     return {
       id: prd.id,
       title: prd.title,
@@ -233,13 +285,6 @@ async function runOne(prd: Prd, i: number, n: number): Promise<PrdResult> {
   const recall = expectedWithTool === 0 ? null : correctToolPicks / expectedWithTool;
   const gate = statusMatches / prd.expected_matches.length;
 
-  console.log(
-    `  ✓ ${result.capabilities.length} caps · score ${result.readiness_score} · verdict ${result.verdict} · in ${usage.input_tokens}t out ${usage.output_tokens}t · $${cost.toFixed(4)}`,
-  );
-  console.log(
-    `     precision ${precision === null ? "n/a" : precision.toFixed(2)} · recall ${recall === null ? "n/a" : recall.toFixed(2)} · gate ${gate.toFixed(2)} · verdict ${verdictMatch ? "✓" : "✗"} · in-range ${inRange ? "✓" : "✗"}`,
-  );
-
   return {
     id: prd.id,
     title: prd.title,
@@ -277,33 +322,21 @@ async function runOne(prd: Prd, i: number, n: number): Promise<PrdResult> {
   };
 }
 
-// --- Main ---
-async function main() {
-  console.log(`Reading dataset: ${DATASET_PATH}`);
-  const dataset: Dataset = JSON.parse(await readFile(DATASET_PATH, "utf8"));
-  console.log(
-    `Loaded ${dataset.prds.length} PRDs (dataset v${dataset.version}, target ${dataset.target_prd_count})`,
-  );
-
-  const results: PrdResult[] = [];
-  for (let i = 0; i < dataset.prds.length; i++) {
-    try {
-      results.push(await runOne(dataset.prds[i], i, dataset.prds.length));
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      console.error(`  ✗ crashed on ${dataset.prds[i].id}: ${msg}`);
-      results.push({
-        id: dataset.prds[i].id,
-        title: dataset.prds[i].title,
-        ok: false,
-        error: msg,
-        expected_verdict: dataset.prds[i].expected_verdict,
-        expected_score_range: dataset.prds[i].expected_score_range,
-        expected_count: dataset.prds[i].expected_matches.length,
-      });
-    }
-  }
-
+// --- Aggregate one pass (all PRDs, one round) into ratio metrics ---
+type PassAggregate = {
+  match_precision: number | null;
+  match_recall: number | null;
+  compliance_gate_accuracy: number | null;
+  verdict_accuracy: number | null;
+  score_in_range_accuracy: number | null;
+  avg_input_tokens: number;
+  avg_output_tokens: number;
+  avg_cost_per_prd_usd: number;
+  total_cost_usd: number;
+  prds_ok: number;
+  prds_failed: number;
+};
+function computePassAggregate(results: PrdResult[]): PassAggregate {
   const ok = results.filter((r): r is PrdResultOk => r.ok);
   const toolCorrect = ok.reduce((s, r) => s + r.tool_pick_correct, 0);
   const toolPicks = ok.reduce((s, r) => s + r.tool_pick_total, 0);
@@ -315,8 +348,7 @@ async function main() {
   const avgIn = ok.length ? ok.reduce((s, r) => s + r.usage.input_tokens, 0) / ok.length : 0;
   const avgOut = ok.length ? ok.reduce((s, r) => s + r.usage.output_tokens, 0) / ok.length : 0;
   const totalCost = ok.reduce((s, r) => s + r.cost_usd, 0);
-
-  const metrics = {
+  return {
     match_precision: toolPicks === 0 ? null : toolCorrect / toolPicks,
     match_recall: expectedTools === 0 ? null : toolCorrect / expectedTools,
     compliance_gate_accuracy: statusTotal === 0 ? null : statusMatches / statusTotal,
@@ -324,48 +356,140 @@ async function main() {
     score_in_range_accuracy: ok.length ? scoreInRange / ok.length : null,
     avg_input_tokens: Math.round(avgIn),
     avg_output_tokens: Math.round(avgOut),
-    avg_total_tokens: Math.round(avgIn + avgOut),
-    avg_cost_per_prd_usd: ok.length ? Number((totalCost / ok.length).toFixed(4)) : 0,
-    total_run_cost_usd: Number(totalCost.toFixed(4)),
-    prds_attempted: results.length,
+    avg_cost_per_prd_usd: Number((ok.length ? totalCost / ok.length : 0).toFixed(4)),
+    total_cost_usd: Number(totalCost.toFixed(4)),
     prds_ok: ok.length,
     prds_failed: results.length - ok.length,
   };
+}
 
-  const fmt = (v: number | null, d = 3) => (v === null ? "  n/a" : v.toFixed(d));
-  console.log("\n" + "═".repeat(58));
-  console.log("                     AGGREGATE");
-  console.log("═".repeat(58));
+// --- Console formatting ---
+const s3 = (s: Stat) =>
+  s.mean === null
+    ? "  n/a"
+    : `${s.mean.toFixed(3)}  [${s.min!.toFixed(3)}-${s.max!.toFixed(3)}]  σ ${s.stdev!.toFixed(3)}`;
+const short = (s: Stat, d = 2) =>
+  s.mean === null
+    ? "n/a"
+    : `${s.mean.toFixed(d)} [${s.min!.toFixed(d)}-${s.max!.toFixed(d)}]`;
+
+// --- Main ---
+async function main() {
+  const runs = parseRuns(process.argv.slice(2));
+  console.log(`Reading dataset: ${DATASET_PATH}`);
+  const dataset: Dataset = JSON.parse(await readFile(DATASET_PATH, "utf8"));
   console.log(
-    `match_precision:          ${fmt(metrics.match_precision)}  (${toolCorrect}/${toolPicks} correct tool picks)`,
+    `Loaded ${dataset.prds.length} PRDs (dataset v${dataset.version}, target ${dataset.target_prd_count}). Runs per PRD: ${runs}.`,
   );
-  console.log(
-    `match_recall:             ${fmt(metrics.match_recall)}  (${toolCorrect}/${expectedTools} expected tools found)`,
-  );
-  console.log(
-    `compliance_gate_accuracy: ${fmt(metrics.compliance_gate_accuracy)}  (${statusMatches}/${statusTotal} status matches)`,
-  );
-  console.log(
-    `verdict_accuracy:         ${fmt(metrics.verdict_accuracy)}  (${verdictMatches}/${ok.length})`,
-  );
-  console.log(
-    `score_in_range_accuracy:  ${fmt(metrics.score_in_range_accuracy)}  (${scoreInRange}/${ok.length})`,
-  );
-  console.log(`avg_input_tokens:         ${metrics.avg_input_tokens}`);
-  console.log(`avg_output_tokens:        ${metrics.avg_output_tokens}`);
-  console.log(`avg_cost_per_prd:         $${metrics.avg_cost_per_prd_usd.toFixed(4)}`);
-  console.log(`total_run_cost:           $${metrics.total_run_cost_usd.toFixed(4)}`);
-  console.log(
-    `prds ok:                  ${metrics.prds_ok}/${metrics.prds_attempted} (failed: ${metrics.prds_failed})`,
-  );
+
+  const passAggregates: PassAggregate[] = [];
+  const perPrdRuns = new Map<string, PrdResult[]>();
+  const sampleDetail = new Map<string, PrdResult>();
+  for (const prd of dataset.prds) perPrdRuns.set(prd.id, []);
+
+  for (let pass = 1; pass <= runs; pass++) {
+    const passResults: PrdResult[] = [];
+    const marks: string[] = [];
+    for (const prd of dataset.prds) {
+      let r: PrdResult;
+      try {
+        r = await evaluateOne(prd);
+      } catch (e) {
+        r = {
+          id: prd.id,
+          title: prd.title,
+          ok: false,
+          error: e instanceof Error ? e.message : String(e),
+          expected_verdict: prd.expected_verdict,
+          expected_score_range: prd.expected_score_range,
+          expected_count: prd.expected_matches.length,
+        };
+      }
+      passResults.push(r);
+      perPrdRuns.get(prd.id)!.push(r);
+      if (pass === 1) sampleDetail.set(prd.id, r); // keep pass-1 detail as a sample
+      marks.push(`${prd.id} ${r.ok ? "✓" : "✗"}`);
+    }
+    passAggregates.push(computePassAggregate(passResults));
+    console.log(`[pass ${pass}/${runs}] ${marks.join("  ")}`);
+  }
+
+  // Aggregate metrics: one value per pass, summarized across passes.
+  const metrics = {
+    match_precision: statBlock(passAggregates.map((p) => p.match_precision)),
+    match_recall: statBlock(passAggregates.map((p) => p.match_recall)),
+    compliance_gate_accuracy: statBlock(
+      passAggregates.map((p) => p.compliance_gate_accuracy),
+    ),
+    verdict_accuracy: statBlock(passAggregates.map((p) => p.verdict_accuracy)),
+    score_in_range_accuracy: statBlock(
+      passAggregates.map((p) => p.score_in_range_accuracy),
+    ),
+    avg_input_tokens: statBlock(passAggregates.map((p) => p.avg_input_tokens)),
+    avg_output_tokens: statBlock(passAggregates.map((p) => p.avg_output_tokens)),
+    avg_cost_per_prd_usd: statBlock(
+      passAggregates.map((p) => p.avg_cost_per_prd_usd),
+    ),
+    total_run_cost_usd: Number(
+      passAggregates.reduce((s, p) => s + p.total_cost_usd, 0).toFixed(4),
+    ),
+  };
+
+  // Per-PRD summaries across the N runs.
+  const perPrd = dataset.prds.map((prd) => {
+    const rs = perPrdRuns.get(prd.id)!;
+    const okRuns = rs.filter((r): r is PrdResultOk => r.ok);
+    const verdictHits = okRuns.filter((r) => r.verdict_match).length;
+    const rangeHits = okRuns.filter((r) => r.score_in_range).length;
+    return {
+      id: prd.id,
+      title: prd.title,
+      runs: rs.length,
+      ok_count: okRuns.length,
+      expected_score_range: prd.expected_score_range,
+      tool_precision: statBlock(okRuns.map((r) => r.tool_precision)),
+      tool_recall: statBlock(okRuns.map((r) => r.tool_recall)),
+      status_accuracy: statBlock(okRuns.map((r) => r.status_accuracy)),
+      score: statBlock(okRuns.map((r) => r.actual_score)),
+      verdict_match_rate: okRuns.length ? round(verdictHits / okRuns.length) : null,
+      score_in_range_rate: okRuns.length ? round(rangeHits / okRuns.length) : null,
+      sample_detail: sampleDetail.get(prd.id),
+    };
+  });
+
+  // Console: per-PRD summary
+  console.log(`\nPer-PRD (mean [min-max] over ${runs} run${runs > 1 ? "s" : ""}):`);
+  for (const p of perPrd) {
+    const v =
+      p.verdict_match_rate === null
+        ? "n/a"
+        : `${Math.round(p.verdict_match_rate * p.ok_count)}/${p.ok_count}`;
+    console.log(
+      `  ${p.id}  ok ${p.ok_count}/${p.runs}  prec ${short(p.tool_precision)}  gate ${short(p.status_accuracy)}  verdict ${v}  score ${short(p.score, 1)}`,
+    );
+  }
+
+  // Console: aggregate with spread
+  console.log("\n" + "═".repeat(64));
+  console.log(`         AGGREGATE  (mean [min-max] σ over ${runs} pass${runs > 1 ? "es" : ""})`);
+  console.log("═".repeat(64));
+  console.log(`match_precision:          ${s3(metrics.match_precision)}`);
+  console.log(`match_recall:             ${s3(metrics.match_recall)}`);
+  console.log(`compliance_gate_accuracy: ${s3(metrics.compliance_gate_accuracy)}`);
+  console.log(`verdict_accuracy:         ${s3(metrics.verdict_accuracy)}`);
+  console.log(`score_in_range_accuracy:  ${s3(metrics.score_in_range_accuracy)}`);
+  console.log(`avg_cost_per_prd_usd:     ${s3(metrics.avg_cost_per_prd_usd)}`);
+  console.log(`total_run_cost:           $${metrics.total_run_cost_usd.toFixed(4)} (${runs} pass${runs > 1 ? "es" : ""})`);
 
   await mkdir(RESULTS_DIR, { recursive: true });
   const payload = {
     timestamp: new Date().toISOString(),
     dataset_version: dataset.version,
     dataset_prd_count: dataset.prds.length,
+    runs,
     metrics,
-    per_prd: results,
+    pass_aggregates: passAggregates,
+    per_prd: perPrd,
   };
   await writeFile(RESULTS_PATH, JSON.stringify(payload, null, 2));
   console.log(`\nWrote results to ${RESULTS_PATH}`);
