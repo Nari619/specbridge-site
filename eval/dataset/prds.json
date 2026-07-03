@@ -1,13 +1,13 @@
 {
-  "version": 1,
+  "version": 2,
   "target_prd_count": 50,
-  "notes": "Test PRDs for the SpecBridge accuracy harness. Each entry declares the expected engine output so the runner can measure precision, recall, compliance-gate accuracy, and cost. Tool names must match rows in the Supabase `tools` registry. Extend by appending to `prds`.",
+  "notes": "Test PRDs for the SpecBridge accuracy harness. Each entry declares the expected engine output so the runner can measure precision, recall, compliance-gate accuracy, and cost. Tool names must match rows in the Supabase `tools` registry. Labels follow the standard documented in README.md ('Labeling standard'). v2: tightened labels on prd_001-003 after the first label-review pass. Extend by appending to `prds`.",
   "prds": [
     {
       "id": "prd_001",
       "title": "Monthly Savings Statement Generator",
       "domain": "accounts",
-      "prd_text": "For each customer savings account, generate a monthly PDF statement. The service pulls the account balance as of the statement date, fetches all transactions for the month, produces a formatted PDF statement, and writes an audit-log entry recording the generation event. Statements are made available in the customer's document center; downstream delivery to email or push is handled by the existing document-center subscription and is out of scope for this PRD. Target: ~800,000 statements per month across the retail savings book.",
+      "prd_text": "For each customer savings account, generate a monthly PDF statement. This PRD covers statement generation only: the service pulls the account balance as of the statement date, fetches all transactions for the month, produces a formatted PDF statement, and writes an audit-log entry recording the generation event. Once generated, the statement is handed to the bank's existing statement-presentment system, which owns making it available in the customer's document center and all downstream delivery (document-center presentment, email, and push). Presentment and delivery are explicitly out of scope for this PRD. Target: ~800,000 statements per month across the retail savings book.",
       "expected_matches": [
         {
           "capability": "Fetch all transactions for the statement month",
@@ -51,9 +51,9 @@
         },
         {
           "capability": "Calculate reward points earned, applying the 3x multiplier for the customer's chosen category",
-          "expected_status": "partial",
+          "expected_status": "risky",
           "expected_tool": "rewards_points_engine",
-          "notes": "Tool exists for standard rewards calculation but has no input for a per-customer category override; needs a modification to accept the chosen category and apply the multiplier. Genuine parameter-level gap."
+          "notes": "rewards_points_engine has empty compliance_tags, but this capability processes an individual cardholder's spend and points (personal financial data), so it requires pii-cleared. The deterministic gate flips it to risky, which overrides the functional partial status. The parameter-level gap (no per-customer category override input) is real but secondary; per SpecBridge governance the compliance risk is the dominant status. Label review: was 'partial', missed the tool's empty tags."
         },
         {
           "capability": "Persist each customer's chosen category for the quarter",
@@ -63,15 +63,27 @@
         },
         {
           "capability": "Send cardholders a monthly points-by-category breakdown",
-          "expected_status": "partial",
-          "expected_tool": "statement_generator",
-          "notes": "Statement generator produces monthly account PDFs; a rewards-specific breakdown template is a modification to its output set."
+          "expected_status": "risky",
+          "expected_tool": "rewards_points_engine",
+          "notes": "The rewards engine owns rewards data, so displaying a points-by-category breakdown is its responsibility rather than the account statement_generator's (label review corrected a soft tool guess). rewards_points_engine has empty compliance_tags and this shows per-cardholder financial data, so the gate flips it to risky, same basis as the points-calculation capability."
         },
         {
           "capability": "Notify cardholders one week before quarter end to pick next quarter's category",
           "expected_status": "risky",
           "expected_tool": "notification_dispatcher",
           "notes": "notification_dispatcher has empty compliance_tags. The capability handles customer PII (name, contact channel); the PII backstop adds pii-cleared to required_clearances and the gate flips this to risky in code."
+        },
+        {
+          "capability": "Schedule the quarter-end reminder notification batch across the cardholder base",
+          "expected_status": "covered",
+          "expected_tool": "batch_job_scheduler",
+          "notes": "Scheduling the recurring quarter-end reminder is a batch-job concern. batch_job_scheduler carries audit-grade and the capability does not itself handle PII, so the gate leaves it covered. Added in label review (was under-decomposed)."
+        },
+        {
+          "capability": "Retrieve cardholder card and profile data to apply rewards logic and send notifications",
+          "expected_status": "risky",
+          "expected_tool": "customer_profile_lookup",
+          "notes": "customer_profile_lookup has empty compliance_tags and returns customer profile PII, so the gate flips it to risky. Added in label review (was under-decomposed)."
         }
       ],
       "expected_verdict": "NO-GO",
@@ -99,7 +111,7 @@
           "capability": "Display real-time BTC and ETH prices in the app",
           "expected_status": "partial",
           "expected_tool": "market_data_feed",
-          "notes": "Existing market data feed provides equity and FX data; a crypto price feed is a modification / extension to its data source coverage."
+          "notes": "Per the extend-vs-new rule: market_data_feed already delivers real-time market data (the real-time delivery plumbing and in-app display exist, ~70%+ of the job); adding crypto symbols is a new data source / integration, i.e. a config/extension gap, so this is partial, not missing. The engine sometimes returns missing here; the labeling standard resolves it to partial."
         },
         {
           "capability": "KYC-verify customer identity before enabling crypto access",
@@ -115,9 +127,9 @@
         },
         {
           "capability": "Post crypto transactions to the general ledger",
-          "expected_status": "partial",
+          "expected_status": "covered",
           "expected_tool": "ledger_posting_service",
-          "notes": "Ledger tool exists but a new chart-of-accounts entry class is needed for crypto assets; modification to its accepted account types."
+          "notes": "ledger_posting_service posts journal entries to the general ledger generically and carries audit-grade. The earlier 'partial' rested on an unstated real-world assumption (a new crypto chart-of-accounts class); grounded only in the registry tool description and the PRD text, generic ledger posting covers this. Label review: was 'partial', corrected to 'covered' (do not inject outside domain knowledge)."
         },
         {
           "capability": "Generate quarterly regulatory reports covering crypto activity",
@@ -127,7 +139,7 @@
         }
       ],
       "expected_verdict": "NO-GO",
-      "expected_score_range": [40, 60]
+      "expected_score_range": [50, 75]
     }
   ]
 }
