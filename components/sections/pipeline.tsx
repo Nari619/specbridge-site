@@ -8,6 +8,8 @@ type Stage = {
   icon: React.ReactNode;
   /** the node's own resting accent color (dimmed when idle, full on active) */
   color: string;
+  /** small illustrative badge revealed on active (e.g. "e.g. 68%") */
+  sample?: string;
   differentiator?: boolean;
 };
 
@@ -102,6 +104,7 @@ const stages: Stage[] = [
     desc: "Covered, partial, risky, and missing roll up into one score.",
     icon: <GaugeIcon />,
     color: "var(--brand)", // brand accent
+    sample: "e.g. 68%",
   },
   {
     title: "Decision: GO / NO-GO",
@@ -202,6 +205,22 @@ export function Pipeline() {
                       }}
                     />
                     {stage.icon}
+                    {/* small illustrative sample badge — always visible so every
+                        visitor sees what a readiness score looks like; brightens
+                        to full opacity when this node is active */}
+                    {stage.sample && (
+                      <span
+                        aria-hidden
+                        className="pointer-events-none absolute -top-3 -right-3 rounded-md border bg-card px-1.5 py-0.5 text-[10px] font-medium tracking-tight tabular-nums transition-opacity duration-300"
+                        style={{
+                          borderColor: c,
+                          color: c,
+                          opacity: isActive ? 1 : 0.55,
+                        }}
+                      >
+                        {stage.sample}
+                      </span>
+                    )}
                   </span>
                   <span
                     className="max-w-[7.5rem] text-center text-xs leading-tight font-medium text-muted-foreground transition-colors duration-300 md:max-w-[8rem]"

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { ReadinessArc } from "@/components/readiness-arc";
 
 export function Hero() {
   return (
@@ -42,9 +41,6 @@ export function Hero() {
           >
             See how it works
           </Button>
-        </div>
-        <div className="mt-20">
-          <ReadinessArc />
         </div>
       </div>
     </section>
