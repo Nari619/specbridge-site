@@ -1,8 +1,11 @@
 # Orchestrator + Tool-Using Agent — Design of Record
 
-Status: **approved design, not yet built.** Rollout is phased and eval-gated
-(see §7). This document is the design of record; the promotion criteria in §7
-are binding and must not be weakened to ship a change.
+Status: **Phase 1 built and measured — NOT promoted (see §9).** The orchestrator
+improved precision (+20pts) and cost (−46%) but could not match the single
+engine's compliance-gate accuracy (0.763 vs 0.883), so by the pre-committed rule
+(§1b) production stays on the single engine. The orchestrator lives behind
+`ANALYZE_ENGINE=orchestrator_p1` (default `single`). Rollout was phased and
+eval-gated (§7); the promotion criteria (§1b) were binding and held.
 
 ---
 
@@ -273,3 +276,94 @@ trace before proceeding.
    `--runs=5`.
 4. This document is the committed design of record, including the binding
    promotion criteria (§1b).
+
+---
+
+## 9. Phase 1 outcome — measured, NOT promoted (2026-07-04)
+
+**Result: the orchestrator did not clear the promotion bar. Production stays on
+the single engine.** This is the disciplined outcome, not a failure — a
+governance tool is exactly the thing that must hold the line when a shinier
+architecture can't match its moat metric. The full evidence:
+
+### The hypothesis
+Replace "cram all 100 tools into a 22k-token prompt and pick" with
+**per-requirement BM25 retrieval → reason over ~6 relevant candidates**. Narrower
+choice set → higher tool-pick precision (the measured weak metric, 68.4%),
+without touching recall or the code-owned gate.
+
+### The method
+Baseline (locked 8-PRD `--runs=5` distribution) → build behind a flag → change
+**one variable at a time** → re-measure `--runs=5` → apply a **pre-committed
+decision rule** (§1b). No goalpost-moving: the rule was written before the
+numbers.
+
+### The full arc (all `--runs=5`)
+
+| Metric | Baseline | v1 | #1+#2 | #3 | sweet-spot | Bar |
+|---|---|---|---|---|---|---|
+| match_precision | 0.684 | 0.682 | 0.740 | 0.915 | **0.879** | > baseline ✅ |
+| match_recall | 0.955 | 0.935 | 0.938 | 0.833 | **0.914** | ≥ 0.935 ❌ |
+| compliance_gate_accuracy | 0.883 | 0.743 | 0.743 | 0.703 | **0.763** | ≥ 0.84 ❌ |
+| verdict_accuracy | 0.875 | 0.875 | 0.975 | 1.000 | **1.000** | — |
+| cost / PRD | $0.109 | $0.074 | $0.069 | $0.052 | $0.059 | — |
+
+- **v1:** precision flat, gate regressed to 0.743. The eval gate caught it.
+- **#1+#2:** recalibrated resolve's status rubric to our own labeling standard,
+  and dropped `input_parameters` from the payload. Precision +5.6pts, verdict
+  0.975 — but gate unchanged.
+- **#3:** constrained decompose granularity. Precision soared to 0.915 but
+  over-merged → recall crashed to 0.833. A trade, not a win.
+- **sweet-spot:** decompose tuned for completeness (every explicit action) +
+  no atomization. Best balance — recall recovered to 0.914, gate to its high of
+  0.763 — still short of both bars.
+
+### The regression, caught by the agent trace
+v1 regressed gate by ~14pts. The **agent step trace** (built into the
+orchestrator) made the diagnosis possible: it showed resolve was **inventing
+unstated requirements** ("the description doesn't confirm as-of-date / crypto
+ticker → partial") — the exact thing we forbid *labelers* from doing — and that
+handing it full `input_parameters` triggered the nitpicking. A second trace
+diagnosis classified the residual gate misses as **(a) pairing/granularity**
+(decompose dropping or atomizing capabilities) vs **(b) genuine status
+divergence**, and found the misses were overwhelmingly (a), with the only (b)
+cases being borderline covered-vs-partial calls where the orchestrator is
+arguably right. That distinction is what told us the ceiling was a granularity
+artifact worth one more shot — not structural.
+
+### The honest outcome, and precisely why
+`gate = 0.763 < 0.84` and `recall = 0.914 < 0.935` — two bars unmet → no
+promotion. Notably, **6 of 8 PRDs clear the gate bar** (prd_001 1.00, prd_005
+0.94, prd_004 0.89, prd_007 0.86, prd_008 0.85, prd_006 0.78); the aggregate is
+blocked by **two mixed-status PRDs, prd_002 (0.34) and prd_003 (0.46)**, which
+resist even the sweet-spot granularity. Add **2–4× worse wall-clock latency**
+(two sequential calls — a real demo concern) and the case to hold is clear. The
+single engine remains better on **the compliance gate — our governance moat.**
+
+### The genuine wins that just didn't clear the moat metric
+- **Precision +20pts** (0.684 → 0.879) — the retrieval-narrowing hypothesis was
+  right about precision.
+- **Cost −46%** ($0.109 → $0.059) — the 22k-token registry left the prompt.
+- **Verdict 0.875 → 1.000**, and the prd_007 divergence probe **graduated**
+  (now agrees with its GO label).
+- Real infrastructure, kept: the shared `analyze-core.ts` gate, the locked BM25
+  retrieval (`lib/retrieval.ts`, 100%@6), the resolve truncation guard, and the
+  agent step trace.
+
+### Revisit ideas (if we return to this)
+1. **Holistic retrieval-augmented single call** — keep the precision/cost win of
+   registry-out-of-prompt (retrieve candidates) but drop the decompose/resolve
+   *split*, doing decompose+match in ONE call over the retrieved candidates. The
+   diagnosis suggests the split — not retrieval — is what hurt gate; this variant
+   tests that directly.
+2. **Per-PRD gate investigation on prd_002 / prd_003** — the two aggregate
+   blockers; determine how much is granularity we can still close vs. borderline
+   labels where the engine is arguably right.
+
+### The meta-point (the actual deliverable)
+The eval-gated methodology is the product here, not the orchestrator. It
+established a stable distribution baseline, caught a regression the moment it
+appeared, diagnosed the cause from a first-class agent trace, and made an
+**evidence-based no-ship call against a pre-committed rule** — spending ~$15 of a
+$30 budget to reach a decisive, defensible answer. That discipline is what makes
+SpecBridge a governance tool rather than a demo.

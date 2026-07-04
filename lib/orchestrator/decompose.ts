@@ -20,10 +20,12 @@ export type DecomposeResult = {
   usage: { input_tokens: number; output_tokens: number };
 };
 
-const SYSTEM = `You are SpecBridge's requirement decomposer. Given a PRD, extract the concrete FUNCTIONAL requirements and decompose them into atomic capabilities — one system action each (e.g. "search policy documents", "pull bureau credit report", "post entries to the general ledger").
+const SYSTEM = `You are SpecBridge's requirement decomposer. Given a PRD, extract the FUNCTIONAL requirements and decompose them into capabilities — one distinct system action each (e.g. "search policy documents", "pull bureau credit report", "post entries to the general ledger").
 
 Rules:
-- One capability per system action. Do not collapse multiple actions into one.
+- COMPLETENESS FIRST. Every distinct action the PRD explicitly states must appear as its own capability. Do NOT drop or silently fold away a stated action — if the PRD verifies identity (KYC), screens against AML/sanctions, categorizes transactions, schedules a job, sends notifications, posts to the ledger, etc., EACH of those is its own capability. Missing a stated action is the worst error.
+- MERGE ONLY DATA VARIATIONS OF THE SAME ACTION. The only thing to collapse is one action repeated across a data variation (asset, currency, direction, product). "Execute crypto trades" is ONE capability, NOT four (BTC→USD, ETH→USD, USD→BTC, USD→ETH); "Display real-time crypto prices" covers BTC and ETH together; "Post transactions to the general ledger" is one capability regardless of asset. But two DIFFERENT actions are always separate capabilities (KYC is not AML; a deposit is not a trade; categorizing is not calculating).
+- RESPECT SCOPE. If the PRD explicitly marks something out of scope, or says it is handled by an existing / external / separate system, do NOT list it as a capability.
 - Do NOT match tools, do NOT classify status, do NOT mention compliance. Only list the capabilities.
 - Ignore non-functional constraints (latency, SLA, throughput, volume) — they are not capabilities.
 
