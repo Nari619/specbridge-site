@@ -85,6 +85,17 @@ Some labels deliberately disagree with the engine to document a known behavior.
   rather than widened, because widening a range while keeping a GO label the
   engine won't produce would be incoherent.
 
+  **UPDATE — the probe graduated (2026-07-04).** Under the orchestrator engine
+  with the resolve-conservatism fix (#1+#2), prd_007 converges toward **GO
+  (~4/5 runs)** — the engine now correctly *agrees* with the GO label. This is
+  the arc the probe was built to trace: it caught the single engine's
+  over-conservatism (any risky / an invented latency-`missing` forcing NO-GO),
+  we diagnosed and fixed the conservatism, and the engine now lands on GO. The
+  probe has **graduated from "catching a bug" to "confirming the fix."** Keep it
+  labeled GO: on the single engine it still diverges (documents the original
+  behavior); on the orchestrator it now agrees (documents the fix). The label is
+  the fixed point against which both engines are read.
+
 ### Score-range calibration (v3)
 
 The five new PRDs' ranges were calibrated to their observed 5-run spread (a

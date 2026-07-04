@@ -206,6 +206,17 @@ export async function resolveRequirements(
     output_tokens: response.usage.output_tokens,
   };
 
+  // Truncation guard — same protection the single engine has. A response cut off
+  // at max_tokens yields broken JSON; detect it explicitly rather than letting
+  // the parse produce garbage. (This is what failed a prd_003 pass before #3
+  // reduced the capability count.)
+  if (response.stop_reason === "max_tokens") {
+    console.error(
+      `[orchestrator_p1] resolve truncated at max_tokens; output=${usage.output_tokens} tokens`,
+    );
+    return { parsed: null, usage };
+  }
+
   let parsed: ParsedResolve | null = null;
   try {
     parsed = parse(JSON.parse(extractJson(text)), toolMap);
