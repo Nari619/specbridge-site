@@ -5,6 +5,7 @@ import registryJson from "@/data/registry.json";
 // client module to load. The runtime fetch uses a dynamic import (see POST).
 import type { RegistryTool } from "@/lib/registry-source";
 import { runAnalysisOrchestrated } from "@/lib/orchestrator/engine";
+import { runAnalysisHolistic } from "@/lib/orchestrator/holistic";
 import {
   type AnalysisResult,
   type Capability,
@@ -387,9 +388,9 @@ export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
  */
 export function analyze(prd: string): Promise<AnalyzeOutcome> {
   const engine = process.env.ANALYZE_ENGINE ?? "single";
-  return engine === "orchestrator_p1"
-    ? runAnalysisOrchestrated(prd)
-    : runAnalysis(prd);
+  if (engine === "orchestrator_p1") return runAnalysisOrchestrated(prd);
+  if (engine === "holistic") return runAnalysisHolistic(prd);
+  return runAnalysis(prd);
 }
 
 export async function POST(request: Request) {

@@ -1,11 +1,13 @@
 # Orchestrator + Tool-Using Agent — Design of Record
 
-Status: **Phase 1 built and measured — NOT promoted (see §9).** The orchestrator
-improved precision (+20pts) and cost (−46%) but could not match the single
-engine's compliance-gate accuracy (0.763 vs 0.883), so by the pre-committed rule
-(§1b) production stays on the single engine. The orchestrator lives behind
-`ANALYZE_ENGINE=orchestrator_p1` (default `single`). Rollout was phased and
-eval-gated (§7); the promotion criteria (§1b) were binding and held.
+Status: **Explored, measured across six configurations — NOT promoted; closed
+(see §9-§10).** Two orchestrator architectures were built and eval-gated: the
+decompose/resolve split (`orchestrator_p1`) and the holistic retrieval-augmented
+single call (`holistic`). Both improved precision (up to +20pts) and cost (−52%)
+but neither matched the single engine's compliance-gate accuracy (best 0.790 vs
+0.883). By the pre-committed rules, **production stays on the single engine**; both
+variants live behind `ANALYZE_ENGINE` (default `single`). The promotion criteria
+were binding and held. Orchestrator exploration is closed.
 
 ---
 
@@ -367,3 +369,40 @@ appeared, diagnosed the cause from a first-class agent trace, and made an
 **evidence-based no-ship call against a pre-committed rule** — spending ~$15 of a
 $30 budget to reach a decisive, defensible answer. That discipline is what makes
 SpecBridge a governance tool rather than a demo.
+
+---
+
+## 10. Final experiment — holistic retrieval-augmented single call (2026-07-04)
+
+Revisit idea #1 above, run as the decisive final experiment. Motivated by our own
+Q2 diagnosis and independently confirmed by external AI review: orchestrator_p1's
+**per-requirement isolation destroyed cross-capability context** — in banking a
+status often depends on relationships between capabilities (an upstream KYC gap
+makes a downstream capability risky; one capability partially covers another).
+The isolated resolve can't see this; the single engine can.
+
+**The variant (`ANALYZE_ENGINE=holistic`):** keep decompose (recall) and BM25
+retrieval, but **UNION + dedupe** all retrieved candidates into one set (~15-20
+tools) and do the matching in **ONE holistic call over all requirements + all
+candidates together** — like the single engine, but over a retrieved subset
+instead of all 100 tools. Same deterministic gate/score (analyze-core).
+
+**Pre-committed rule:** promote iff gate ≥ 0.84 AND recall ≥ 0.935 AND precision
+≥ baseline; else keep the single engine and stop (no Solutions 2/3/4).
+
+**Result (`--runs=5`):** precision **0.886**, recall **0.914**, gate **0.790**,
+verdict **1.000**, cost **$0.052/PRD (−52%)**.
+
+**Decision: NOT promoted.** gate 0.790 < 0.84 and recall 0.914 < 0.935.
+
+**What it proved.** The cross-capability hypothesis was *correct and validated*:
+holistic is the best orchestrator variant on every axis, its gate (0.790) is the
+highest of all six configurations, and **prd_003 recovered from 0.46 → 0.71** as
+the holistic call restored the KYC/AML context the isolated split had dropped.
+**7 of 8 PRDs clear the gate bar**; the aggregate is blocked essentially by a
+single PRD (prd_002, gate 0.20), and recall is capped by decompose granularity.
+But the decisive finding stands: **holistic judgment over a *retrieved subset*
+narrowed the gap yet could not match the single engine's holistic judgment over
+the *full registry* on the compliance gate — our moat.** Six measured
+configurations, one conclusion: the single engine wins on the metric that matters
+most for governance. Orchestrator exploration is closed.
