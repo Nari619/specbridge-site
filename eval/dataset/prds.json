@@ -109,9 +109,9 @@
         },
         {
           "capability": "Display real-time BTC and ETH prices in the app",
-          "expected_status": "partial",
+          "expected_status": "covered",
           "expected_tool": "market_data_feed",
-          "notes": "Per the extend-vs-new rule: market_data_feed already delivers real-time market data (the real-time delivery plumbing and in-app display exist, ~70%+ of the job); adding crypto symbols is a new data source / integration, i.e. a config/extension gap, so this is partial, not missing. The engine sometimes returns missing here; the labeling standard resolves it to partial."
+          "notes": "Corrected partial -> covered (2026-07-04 label review, on merit). market_data_feed's description is generic ('Provides real-time and delayed market data') and states no asset-class limit; downgrading to partial because 'crypto is a new data source' injects an UNSTATED specific, which our labeling standard forbids ('do not downgrade for unstated specifics the description doesn't mention'). This is the same correction already applied to ledger_posting_service (generic 'posts journal entries' -> covered for crypto). Contrast trade_execution_service, whose description explicitly says 'equity and ETF trades' — a STATED exclusion — so crypto trading stays missing."
         },
         {
           "capability": "KYC-verify customer identity before enabling crypto access",

@@ -406,3 +406,29 @@ narrowed the gap yet could not match the single engine's holistic judgment over
 the *full registry* on the compliance gate — our moat.** Six measured
 configurations, one conclusion: the single engine wins on the metric that matters
 most for governance. Orchestrator exploration is closed.
+
+### Three-way independent convergence
+
+Three independent analyses picked the *same* fix as #1, before it was built:
+1. **Our own agent-trace diagnosis** (the Q2 classification: isolation, not
+   retrieval, was destroying cross-capability status judgment).
+2. **This design doc's own §9 revisit-idea #1**, written at the split's close-out.
+3. **An external AI review**, which independently identified per-requirement
+   isolation as the root cause and holistic-single-call-over-retrieved-candidates
+   as the remedy.
+
+That convergence is itself a result worth recording: three separate lines of
+reasoning agreed on the mechanism *and* the fix — and when we built exactly that
+fix and measured it against a pre-committed bar, it still could not beat the
+single engine on the governance moat. The methodology (locked baseline →
+one-variable experiments → agent-trace diagnosis → pre-committed decision rule)
+did not just pick a direction; it kept us honest when the well-motivated,
+independently-endorsed fix turned out to be second-best. **That discipline — not
+any single engine — is the durable asset.**
+
+> Footnote on numbers: the gate figures in this section were measured before the
+> 2026-07-04 `market_data_feed` label correction (prd_003, partial → covered).
+> That correction helps *both* engines by one capability on one PRD and does not
+> approach the ~9-point single-vs-holistic gate gap, so the conclusion is
+> unchanged. If an exact refreshed baseline is wanted, re-run `--runs=5` on the
+> single engine.
