@@ -4,6 +4,7 @@ import registryJson from "@/data/registry.json";
 // Type-only import — erased at compile time, so it never triggers the Supabase
 // client module to load. The runtime fetch uses a dynamic import (see POST).
 import type { RegistryTool } from "@/lib/registry-source";
+import { runAnalysisOrchestrated } from "@/lib/orchestrator/engine";
 import {
   type AnalysisResult,
   type Capability,
@@ -377,6 +378,20 @@ export async function runAnalysis(prd: string): Promise<AnalyzeOutcome> {
   return { ok: true, result, usage };
 }
 
+/**
+ * Engine dispatcher. Selects the analysis engine from the ANALYZE_ENGINE env
+ * var — default "single" so production is untouched; "orchestrator_p1" routes
+ * to the tool-using orchestrator. Both return the same AnalyzeOutcome, so POST
+ * and the eval harness are engine-agnostic. Promotion of the orchestrator to
+ * default requires the eval-gated criteria in docs/orchestrator-design.md.
+ */
+export function analyze(prd: string): Promise<AnalyzeOutcome> {
+  const engine = process.env.ANALYZE_ENGINE ?? "single";
+  return engine === "orchestrator_p1"
+    ? runAnalysisOrchestrated(prd)
+    : runAnalysis(prd);
+}
+
 export async function POST(request: Request) {
   let prd: unknown;
   try {
@@ -401,7 +416,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const outcome = await runAnalysis(prd);
+  const outcome = await analyze(prd);
   if (!outcome.ok) {
     return NextResponse.json({ error: outcome.error }, { status: outcome.httpStatus });
   }

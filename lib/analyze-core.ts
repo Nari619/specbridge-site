@@ -109,6 +109,9 @@ export type AnalysisResult = {
   verdict: "GO" | "NO-GO";
   verdict_reasoning: string;
   unblock_path: string;
+  /** Present only for the orchestrator engine — the agent step trace. Additive
+   * and optional; the single engine and all consumers ignore it. */
+  agent_trace?: unknown;
 };
 
 // Engine return contract — shared so route dispatch is interchangeable.

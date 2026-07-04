@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 export type RegistryTool = {
   name: string;
   description: string;
+  category: string | null;
   input_parameters: { name: string; type: string; required: boolean }[];
   owner_team: string;
   owner_contact: string;
@@ -62,6 +63,7 @@ function mapRow(row: ToolRow): RegistryTool {
   return {
     name: row.name ?? "",
     description: row.description ?? "",
+    category: row.category ?? null,
     input_parameters: mapParameters(row.input_parameters),
     owner_team: row.owner_team ?? "",
     owner_contact: row.owner_contact ?? "",
