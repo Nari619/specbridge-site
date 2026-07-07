@@ -5,8 +5,10 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ScoreArc } from "@/components/score-arc";
 import { CapabilityCard } from "@/components/demo/capability-card";
+import { TwinCallout } from "@/components/demo/twin-callout";
 import { samplePrds } from "@/data/sample-prds";
 import type { AnalysisResult, Capability } from "@/app/api/analyze/route";
+import type { TwinMatch } from "@/lib/twin-detection";
 
 type View = "pm" | "engineering" | "compliance";
 
@@ -33,6 +35,7 @@ export function DemoClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [twin, setTwin] = useState<TwinMatch | null>(null);
   const [view, setView] = useState<View>("pm");
 
   function selectSample(id: string) {
@@ -46,6 +49,7 @@ export function DemoClient() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setTwin(null);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -59,6 +63,15 @@ export function DemoClient() {
       }
       setResult(data as AnalysisResult);
       setView("pm");
+      // Twin-catcher — best-effort, never blocks or breaks the report.
+      fetch("/api/similar-prd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prd, capabilities: (data as AnalysisResult).capabilities }),
+      })
+        .then((r) => r.json())
+        .then((j) => setTwin((j?.twin as TwinMatch | null) ?? null))
+        .catch(() => {});
     } catch {
       setError("Couldn't reach the analysis service. Check your connection and try again.");
     } finally {
@@ -228,6 +241,7 @@ export function DemoClient() {
           className="mt-12 overflow-hidden rounded-2xl border bg-card shadow-sm"
         >
           <div className="space-y-8 p-6 md:p-10">
+            {twin && <TwinCallout twin={twin} />}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="inline-flex rounded-lg border p-1">
                 {(Object.keys(viewConfig) as View[]).map((v) => (
