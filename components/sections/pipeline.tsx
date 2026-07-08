@@ -94,7 +94,7 @@ const stages: Stage[] = [
   },
   {
     title: "Compliance Gate",
-    desc: "Code checks every match for the clearances it needs. Risky is decided here, not guessed.",
+    desc: "Code checks every match for the clearances it needs. Risky is decided here — by rules you can read, not the model.",
     icon: <ShieldIcon />,
     color: "#d4a24e", // amber / gold
     differentiator: true,

@@ -5,6 +5,7 @@ import { Pipeline } from "@/components/sections/pipeline";
 import { Problem } from "@/components/sections/problem";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { Report } from "@/components/sections/report";
+import { Measured } from "@/components/sections/measured";
 import { Vision } from "@/components/sections/vision";
 import { Cta } from "@/components/sections/cta";
 
@@ -38,6 +39,7 @@ export default function Home() {
         <Pipeline />
         <HowItWorks />
         <Report />
+        <Measured />
         <Vision />
         <Cta />
       </main>

@@ -17,13 +17,14 @@ export function Problem() {
             %
           </p>
           <p className="mt-6 max-w-2xl text-3xl leading-snug font-medium tracking-tight text-balance md:text-4xl">
-            Up to 40% of engineering effort goes into rebuilding things the org
-            already has.
+            Industry estimates put up to 40% of engineering effort into
+            rebuilding things the org already has.
           </p>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Not because engineers want to, because nobody could see it at spec
-            time. The knowledge was there. It just lived in someone else&rsquo;s
-            repo, sprint, or head.
+            time. The capability already existed in another team&rsquo;s
+            registry. Or another team was scoping the very same thing that week.
+            SpecBridge makes it visible before anyone writes code.
           </p>
         </FadeIn>
       </div>

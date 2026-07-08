@@ -2,24 +2,24 @@ import { FadeIn } from "@/components/fade-in";
 
 const steps = [
   {
-    title: "Connect your sources",
-    body: "Your MCP tool registry (Kong, JFrog, or internal catalog) plus Confluence and Jira. Metadata only. Never your source code. Security teams clear it in days, not quarters.",
+    title: "Paste your PRD",
+    body: "Drop in a spec. No integration needed for the demo — it runs against a seeded 100-tool banking registry.",
   },
   {
-    title: "SpecBridge maps reality",
-    body: "A live graph of what's shipped, what's in flight, and what's deprecated, across every team.",
+    title: "Decompose and match",
+    body: "SpecBridge breaks the PRD into atomic capabilities and matches each against the registry: covered, needs modification, or missing.",
   },
   {
-    title: "Write your spec",
-    body: "Draft where you already draft. SpecBridge reads along as you type.",
+    title: "The compliance gate runs in code",
+    body: "For every match, deterministic code — not the model — reads the tool's compliance tags and flags what's risky. You can read the rule.",
   },
   {
-    title: "Get your readiness score",
-    body: "Overlaps, gaps, and hidden dependencies, scored 0 to 100, each with an owner attached.",
+    title: "Get a verdict, a score, and the reasoning",
+    body: "GO or NO-GO, a 0-to-100 readiness score, and a “How SpecBridge decided” audit trail showing which tag triggered which flag.",
   },
   {
-    title: "Hand off with confidence",
-    body: "Engineering starts with answers instead of archaeology.",
+    title: "And a duplicate-work alert",
+    body: "If another team already scoped an overlapping PRD, SpecBridge flags it — with the specific capabilities you'd both be building.",
   },
 ];
 
@@ -32,7 +32,7 @@ export function HowItWorks() {
             How it works
           </p>
           <h2 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight text-balance md:text-5xl">
-            Five steps from guesswork to ground truth.
+            From a pasted spec to a decision you can audit.
           </h2>
         </FadeIn>
         <ol className="mt-20">

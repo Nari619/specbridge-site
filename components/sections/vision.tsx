@@ -13,9 +13,9 @@ export function Vision() {
             Every spec, grounded in what your org already knows.
           </h2>
           <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-neutral-400">
-            Readiness scores are the start. SpecBridge is becoming the living
-            map between product intent and engineering reality, so nothing
-            gets built twice, and nothing ships blind.
+            Readiness scoring is the start. The direction: a living map between
+            product intent and engineering reality, so nothing gets built twice,
+            and nothing ships blind.
           </p>
         </FadeIn>
       </div>
