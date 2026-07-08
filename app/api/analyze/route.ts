@@ -6,6 +6,7 @@ import registryJson from "@/data/registry.json";
 import type { RegistryTool } from "@/lib/registry-source";
 import { runAnalysisOrchestrated } from "@/lib/orchestrator/engine";
 import { runAnalysisHolistic } from "@/lib/orchestrator/holistic";
+import { checkRateLimit, clientIp } from "@/lib/rate-limit";
 import {
   type AnalysisResult,
   type Capability,
@@ -414,6 +415,16 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "PRD is too long for the demo. Keep it under 12,000 characters." },
       { status: 400 },
+    );
+  }
+
+  // Per-IP rate limit — guards the paid LLM call. Only counts requests that got
+  // this far (valid PRD), so malformed requests don't consume anyone's budget.
+  const rl = checkRateLimit(clientIp(request));
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit reached — try again in a few minutes." },
+      { status: 429, headers: { "Retry-After": String(rl.retryAfterSec) } },
     );
   }
 
