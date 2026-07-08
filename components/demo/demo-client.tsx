@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ScoreArc } from "@/components/score-arc";
 import { CapabilityCard } from "@/components/demo/capability-card";
 import { TwinCallout } from "@/components/demo/twin-callout";
+import { DecisionTrace } from "@/components/demo/decision-trace";
 import { samplePrds } from "@/data/sample-prds";
 import type { AnalysisResult, Capability } from "@/app/api/analyze/route";
 import type { TwinMatch } from "@/lib/twin-detection";
@@ -268,6 +269,8 @@ export function DemoClient() {
                 </p>
               )}
             </div>
+
+            <DecisionTrace result={result} />
 
             {view === "pm" && (
               <>
